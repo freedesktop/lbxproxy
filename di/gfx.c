@@ -46,6 +46,8 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/gfx.c,v 1.6 2001/12/14 20:00:51 dawes Exp $ */
+
 /*
  * graphics acceleration
  */
@@ -880,15 +882,15 @@ ProcLBXPutImage(client)
     char	*out;
     int         len,
 		reqlen,
-                method,
+                method = 0,
                 compBytes,
                 status;
 #ifdef LBX_STATS
     float       percentCompression;
     char	*methodName;
 #endif
-    LbxBitmapCompMethod *bcompMethod;
-    LbxPixmapCompMethod *pcompMethod;
+    LbxBitmapCompMethod *bcompMethod = NULL;
+    LbxPixmapCompMethod *pcompMethod = NULL;
     GFX_CACHE_DECLARE;
 
     status = LBX_IMAGE_COMPRESS_SUCCESS;

@@ -46,6 +46,7 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/options.c,v 1.7 2001/12/14 20:00:51 dawes Exp $ */
 
 #include <stdio.h>
 #include "X.h"
@@ -483,8 +484,9 @@ OptZlibReply(server, preply, replylen)
     unsigned char *preply;
     int		  replylen;
 {
-    server->lbxNegOpt.streamOpts.streamCompInit = ZlibInit;
-    server->lbxNegOpt.streamOpts.streamCompArg = (pointer) zlevel;
+    server->lbxNegOpt.streamOpts.streamCompInit =
+	(LbxStreamCompHandle (*)(int, pointer))ZlibInit;
+    server->lbxNegOpt.streamOpts.streamCompArg = (pointer)(long) zlevel;
     server->lbxNegOpt.streamOpts.streamCompStuffInput = ZlibStuffInput;
     server->lbxNegOpt.streamOpts.streamCompInputAvail = ZlibInputAvail;
     server->lbxNegOpt.streamOpts.streamCompFlush = ZlibFlush;
@@ -492,7 +494,8 @@ OptZlibReply(server, preply, replylen)
     server->lbxNegOpt.streamOpts.streamCompWriteV = ZlibWriteV;
     server->lbxNegOpt.streamOpts.streamCompOn = ZlibCompressOn;
     server->lbxNegOpt.streamOpts.streamCompOff = ZlibCompressOff;
-    server->lbxNegOpt.streamOpts.streamCompFreeHandle = ZlibFree;
+    server->lbxNegOpt.streamOpts.streamCompFreeHandle =
+	(void (*)(LbxStreamCompHandle))ZlibFree;
 
     return 0;
 }

@@ -45,12 +45,20 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/wire.c,v 1.14 2002/09/19 13:22:03 tsi Exp $ */
 
 #include "lbx.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "wire.h"
+#include "tags.h"
+#include "colormap.h"
 #include "init.h"
+#ifndef Lynx
 #include <sys/uio.h>
+#else
+#include <uio.h>
+#endif
 #include <errno.h>
 #include "proxyopts.h"
 #include "swap.h"
@@ -72,7 +80,7 @@ in this Software without prior written authorization from The Open Group.
 /*
  * The following include for utsname.h is from lib/xtrans
  */
-#if (defined(_POSIX_SOURCE) && !defined(AIXV3)) || defined(hpux) || defined(USG) || defined(SVR4)
+#if (defined(_POSIX_SOURCE) && !defined(AIXV3) && !defined(__QNX__)) || defined(hpux) || defined(USG) || defined(SVR4)
 #define NEED_UTSNAME
 #include <sys/utsname.h>	/* uname() */
 #else
@@ -134,16 +142,16 @@ WriteReqToServer(client, len, buf, checkLargeRequest)
 	delta_out_attempts++;
 #endif
 
-	if ((diffs = LBXDeltaMinDiffs(&server->outdeltas, buf, len,
-			     min(MAXBYTESDIFF, (len - sz_xLbxDeltaReq) >> 1),
+	if ((diffs = LBXDeltaMinDiffs(&server->outdeltas, (unsigned char *)buf,
+			len, min(MAXBYTESDIFF, (len - sz_xLbxDeltaReq) >> 1),
 				      &cindex)) >= 0) {
 
 #ifdef LBX_STATS
 	    delta_out_hits++;
 #endif
 
-	    LBXEncodeDelta(&server->outdeltas, buf, diffs, cindex,
-			   &server->tempdeltabuf[sz_xLbxDeltaReq]);
+	    LBXEncodeDelta(&server->outdeltas, (unsigned char *)buf, diffs,
+			   cindex, &server->tempdeltabuf[sz_xLbxDeltaReq]);
 	    p->reqType = server->lbxReq;
 	    p->lbxReqType = X_LbxDelta;
 	    p->diffs = diffs;
@@ -154,7 +162,7 @@ WriteReqToServer(client, len, buf, checkLargeRequest)
 	    WriteToServer(client, newlen, (char *) p, TRUE, checkLargeRequest);
 	    written = TRUE;
 	}
-	LBXAddDeltaOut(&server->outdeltas, buf, len);
+	LBXAddDeltaOut(&server->outdeltas, (unsigned char *)buf, len);
     }
     if (!written) {
 #ifdef BIGREQS
@@ -407,10 +415,21 @@ SendIncrementPixel(client, cmap, pixel)
 }
 
 void
+#ifdef NeedFunctionPrototypes
+SendAllocColor(
+    ClientPtr	client,
+    XID		cmap,
+    CARD32	pixel,
+    CARD16	red,
+    CARD16	green,
+    CARD16	blue)
+#else
 SendAllocColor(client, cmap, pixel, red, green, blue)
     ClientPtr   client;
     XID         cmap;
+    CARD32      pixel;
     CARD16	red, green, blue;
+#endif
 {
     xLbxAllocColorReq req;
 
@@ -859,8 +878,10 @@ ServerProcStandardEvent(sc)
 #endif
 
 	/* Note that LBXDecodeDelta decodes and adds current msg to the cache */
-	len = LBXDecodeDelta(&server->indeltas, ((char *) rep) + sz_xLbxDeltaReq,
-			     delta->diffs, delta->cindex, &rep);
+	len = LBXDecodeDelta(&server->indeltas,
+			     (xLbxDiffItem *)((char *) rep + sz_xLbxDeltaReq),
+			     delta->diffs, delta->cindex,
+			     (unsigned char **)&rep);
 
 	/* Make local copy in case someone writes to the request buffer */
 	memcpy(server->tempdeltabuf, (char *) rep, len);
@@ -876,7 +897,7 @@ ServerProcStandardEvent(sc)
 	delta_in_attempts++;
 #endif
 
-	LBXAddDeltaIn(&server->indeltas, (char *) rep, len);
+	LBXAddDeltaIn(&server->indeltas, (unsigned char *) rep, len);
     }
     if (rep->generic.type == server->lbxEvent &&
 	rep->generic.data1 != LbxMotionDeltaEvent) {
@@ -950,7 +971,7 @@ ServerProcStandardEvent(sc)
 		     start, end);
 #endif
 	    if (pmap && pmap->grab_status == CMAP_GRABBED)
-		GotServerFreeCellsEvent (pmap, start, end, 1);
+		GotServerFreeCellsEvent (pmap, start, end);
 	    break;
 	}
 	}
@@ -1328,7 +1349,7 @@ StartProxyReply(server, rep)
 		      server->lbxNegOpt.serverDeltaMaxLen);
     LBXInitDeltaCache(&server->outdeltas, server->lbxNegOpt.proxyDeltaN,
 		      server->lbxNegOpt.proxyDeltaMaxLen);
-    QueueWorkProc(ProxyWorkProc, NULL, (pointer) server->index);
+    QueueWorkProc(ProxyWorkProc, NULL, (pointer)(long) server->index);
 
 #ifdef OPTDEBUG
     fprintf(stderr, "squishing = %d\n", server->lbxNegOpt.squish);
@@ -1511,9 +1532,10 @@ ConnectToServer(dpy_name)
 	return FALSE;
     }
     bzero(server, sizeof(XServerRec));
+    
     if (!InitServer (dpy_name, i, server, &sequence)) {
 	if (proxyMngr) {
-	    (void) sprintf (proxy_address, 
+	    (void) snprintf (proxy_address, sizeof(proxy_address),
 			    "could not connect to server '%s'",
 			    dpy_name);
 	    SendGetProxyAddrReply( PM_iceConn, PM_Failure, NULL, proxy_address);
@@ -1539,13 +1561,19 @@ ConnectToServer(dpy_name)
 
 #ifdef NEED_UTSNAME
 	uname (&name);
-	(void) strcpy (my_host, name.nodename);
+	(void) snprintf(my_host,sizeof(my_host),"%s",name.nodename);
 #else
-        (void) gethostname (my_host, 250);
+        (void) gethostname (my_host,sizeof(my_host));
 #endif
     }
-    (void) sprintf (proxy_address, "%s:%s", my_host, display);
-
+    if (snprintf (proxy_address, sizeof(proxy_address) ,"%s:%s", my_host,
+		  display) >= sizeof(proxy_address)) {
+	(void) snprintf (proxy_address, sizeof(proxy_address),
+			 "display name too long");
+	SendGetProxyAddrReply( PM_iceConn, PM_Failure, NULL, proxy_address);
+	return FALSE;
+    }
+    
     servers[i] = server;
 
     sc = AllocNewConnection(server->fd, -1, TRUE, NULL);

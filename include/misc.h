@@ -27,13 +27,13 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
+/* $XFree86: xc/programs/lbxproxy/include/misc.h,v 1.7 2001/12/14 20:00:55 dawes Exp $ */
 
 #ifndef MISC_H
 #define MISC_H 1
 
 #define NEED_EVENTS
 #define NEED_REPLIES
-#define _XLBX_SERVER_
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/Xmd.h>
@@ -43,21 +43,15 @@ from The Open Group.
 #include "Xalloca.h"
 #include "Xfuncs.h"
 #include "Xfuncproto.h"
+#include "lbxstr.h"
 
-typedef void *pointer;
-#ifndef _BOOL_ALREADY_DEFINED_
-typedef int Bool;
-#endif
 #ifndef TRUE
 #define FALSE 0
 #define TRUE 1
 #endif
-typedef struct _Client *ClientPtr;
 typedef struct _XServer *XServerPtr;
 
-#ifndef NULL
-#define NULL 0
-#endif
+#include <stddef.h>
 #define DE_RESET     1
 #define DE_TERMINATE 2
 #define MILLI_PER_SECOND (1000)

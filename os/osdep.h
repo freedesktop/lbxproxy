@@ -45,6 +45,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/programs/lbxproxy/os/osdep.h,v 1.11 2002/05/31 18:46:08 dawes Exp $ */
 
 #define BOTIMEOUT 200 /* in milliseconds */
 #define BUFSIZE 4096
@@ -65,6 +66,10 @@ SOFTWARE.
 #endif
 #endif
 
+#if defined(__UNIXOS2__) || defined(__QNX__)
+#define OPEN_MAX 256
+#endif
+
 #ifndef OPEN_MAX
 #ifdef SVR4
 #define OPEN_MAX 128
@@ -80,15 +85,27 @@ SOFTWARE.
 #endif
 #endif
 
+#include <X11/Xpoll.h>
+
+/*
+ * MAXSOCKS is used only for initialising MaxClients when no other method
+ * like sysconf(_SC_OPEN_MAX) is not supported.
+ */
+
 #if OPEN_MAX <= 128
 #define MAXSOCKS (OPEN_MAX - 1)
 #else
 #define MAXSOCKS 128
 #endif
 
-#ifndef NULL
-#define NULL 0
+/* MAXSELECT is the number of fds that select() can handle */
+#define MAXSELECT (sizeof(fd_set) * NBBY)
+
+#if !defined(hpux) && !defined(SVR4) && !defined(SYSV)
+#define HAS_GETDTABLESIZE
 #endif
+
+#include <stddef.h>
 
 typedef struct _connectionInput {
     struct _connectionInput *next;
@@ -126,26 +143,30 @@ typedef struct _osComm {
     (*((OsCommPtr)((who)->osPrivate))->flushClient)(who, oc, extraBuf, extraCount)
 
 extern void FreeOsBuffers(
-#if NeedFunctionPrototypes
     OsCommPtr /*oc*/
-#endif
 );
 
 extern int StandardFlushClient(
-#if NeedFunctionPrototypes
     ClientPtr /*who*/,
     OsCommPtr /*oc*/,
     char * /*extraBuf*/,
     int /*extraCount*/
-#endif
 );
 
 extern int LbxFlushClient(
-#if NeedFunctionPrototypes
     ClientPtr /*who*/,
     OsCommPtr /*oc*/,
     char * /*extraBuf*/,
     int /*extraCount*/
-#endif
 );
+
+#include "util.h"
+
+extern int *ConnectionTranslation;
+extern int *ConnectionOutputTranslation;
+
+extern WorkQueuePtr workQueue;
+
+#define ffs mffs
+extern int mffs(fd_mask);
 

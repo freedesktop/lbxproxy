@@ -23,7 +23,10 @@
 .\" other dealings in this Software without prior written authorization
 .\" from The Open Group.
 .\" 
-.TH LBXPROXY 1 "Release 6.4" "X Version 11"
+.\"
+.\" $XFree86: xc/programs/lbxproxy/lbxproxy.man,v 1.8 2001/12/14 20:00:49 dawes Exp $
+.\"
+.TH LBXPROXY 1 __xorgversion__
 .SH NAME
 lbxproxy - Low BandWidth X proxy
 .SH SYNOPSIS

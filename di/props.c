@@ -46,6 +46,8 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/props.c,v 1.6 2001/12/14 20:00:52 dawes Exp $ */
+
 /*
  * property handling
  */
@@ -332,7 +334,7 @@ GetLbxGetPropertyReply(client, nr, data)
 			client->server->prop_cache, tag);
 
 	    if (!ptdp) {
-		fprintf(stderr, "no data for property tag 0x%x\n", tag);
+		fprintf(stderr, "no data for property tag 0x%lx\n", (long)tag);
 		WriteError(client, X_GetProperty, 0, 0, BadAlloc);
 		return TRUE;
 	    }
