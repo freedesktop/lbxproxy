@@ -762,6 +762,8 @@ CloseDownConnection(client)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
 
+    if(!oc)
+      return;
     if (oc->output && oc->output->count)
 	FlushClient(client, oc, (char *)NULL, 0);
     ConnectionTranslation[oc->fd] = 0;
