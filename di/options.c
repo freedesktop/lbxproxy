@@ -1,4 +1,4 @@
-/* $XdotOrg: xc/programs/lbxproxy/di/options.c,v 1.1.4.3.4.1 2004/03/04 17:48:50 eich Exp $ */
+/* $XdotOrg: xc/programs/lbxproxy/di/options.c,v 1.2 2004/04/23 19:54:33 eich Exp $ */
 /* $Xorg: options.c,v 1.4 2001/02/09 02:05:31 xorgcvs Exp $ */
 /*
 
