@@ -256,6 +256,7 @@ extern void WriteReqToServer(
 
 extern void _write_to_server(
     ClientPtr /*client*/,
+    Bool /*compressed*/,
     int /*len*/,
     char* /*buf*/,
     Bool /*checkLarge*/,
@@ -309,17 +310,6 @@ extern void SendAllocColor(
     CARD16    /* red */,
     CARD16    /* green */,
     CARD16    /* blue */
-);
-
-extern void SendAllocColor(
-#if NeedFunctionPrototypes
-    ClientPtr /* pClient */,
-    XID       /* cmap */,
-    CARD32    /* pixel */,
-    CARD16    /* red */,
-    CARD16    /* green */,
-    CARD16    /* blue */
-#endif
 );
 
 extern void SendGetModifierMapping(
