@@ -24,7 +24,7 @@ not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
 from The Open Group.
 */
-/* $XFree86: xc/programs/lbxproxy/di/pm.c,v 1.15 2004/01/07 04:28:06 dawes Exp $ */
+/* $XFree86$ */
 
 #include <ctype.h>
 #include <stdio.h>
