@@ -45,13 +45,13 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/include/lbx.h,v 1.6 2001/12/14 20:00:55 dawes Exp $ */
 
 #ifndef _LBX_H_
 #define _LBX_H_
 #include "misc.h"
 #include "os.h"
 #include "util.h"
-#define _XLBX_SERVER_
 #include "lbxstr.h"
 
 /* we keep the ifdefs in the code as a guide to what's going on */

@@ -25,7 +25,9 @@ not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
 from The Open Group.
 */
+/* $XFree86: xc/programs/lbxproxy/di/pm.c,v 1.9 2002/09/16 18:06:20 eich Exp $ */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -33,6 +35,7 @@ from The Open Group.
 #include <netinet/in.h>
 #include <netdb.h>
 #include <X11/Xmd.h>
+#include <X11/Xlib.h>
 #include <X11/ICE/ICElib.h>
 #include <X11/ICE/ICEmsg.h>
 #include <X11/ICE/ICEproto.h>
@@ -187,7 +190,7 @@ _ConnectToProxyManager (pmAddr, errorString)
     if ((PM_iceConn = IceOpenConnection (
 	pmAddr,	NULL, 0, 0, sizeof(iceError), iceError)) == NULL)
     {
-	sprintf (errorString,
+	snprintf (errorString, sizeof(errorString),
 	    "Could not open ICE connection to proxy manager: %s", iceError);
 	return 0;
     }
@@ -200,7 +203,7 @@ _ConnectToProxyManager (pmAddr, errorString)
     if (setupstat != IceProtocolSetupSuccess)
     {
 	IceCloseConnection (PM_iceConn);
-	sprintf (errorString,
+	snprintf (errorString,sizeof(errorString),
 	    "Could not initialize proxy management protocol: %s",
 	    iceError);
 	return 0;
@@ -407,12 +410,8 @@ PMprocessMessages (iceConn, clientData, opcode, length,
 		 * Connect to this server and send a GetProxyAddrReply msg.
 		 */
 		if (!ConnectToServer (display_name)) {
-		    char msg [100];
-
-		    (void) sprintf (msg, 
-				    "could not connect to '%s'", 
-				    display_name);
-		    FatalError(msg);
+		    FatalError ("could not connect to '%s'", 
+				display_name);
 		}
 	    }
 	    else

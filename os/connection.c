@@ -44,7 +44,7 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
-/*****************************************************************
+ *****************************************************************
  *  Stuff to create connections --- OS dependent
  *
  *      EstablishNewConnections, CreateWellKnownSockets, 
@@ -60,6 +60,7 @@ SOFTWARE.
  *      socket ids aren't small nums (0 - 2^8)
  *
  *****************************************************************/
+/* $XFree86: xc/programs/lbxproxy/os/connection.c,v 1.18 2002/07/06 09:59:17 alanh Exp $ */
 
 #include "misc.h"
 #include <X11/Xtrans.h>
@@ -67,10 +68,6 @@ SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>			/* atoi */
 #include <errno.h>
-#ifdef X_NOT_STDC_ENV
-extern int errno;
-#endif
-
 #include <signal.h>
 #include <setjmp.h>
 
@@ -85,9 +82,13 @@ extern int errno;
 #include <sys/ioctl.h>
 #endif
 
+#ifdef QNX4
+#include <sys/stat.h>
+#endif
+
 #if defined (TCPCONN) || defined(STREAMSCONN)
 # include <netinet/in.h>
-# ifndef hpux
+# if !defined(hpux)
 #  ifdef apollo
 #   ifndef NO_TCP_H
 #    include <netinet/tcp.h>
@@ -126,7 +127,7 @@ fd_set LastSelectMask;		/* mask returned from last select call */
 fd_set ClientsWithInput;	/* clients with FULL requests in buffer */
 fd_set ClientsWriteBlocked;	/* clients who cannot receive output */
 fd_set OutputPending;		/* clients with reply/event data ready to go */
-int MaxClients = MAXSOCKS;
+int MaxClients = 0;
 Bool NewOutputPending;		/* not yet attempted to write some new output */
 Bool AnyClientsWriteBlocked;	/* true if some client blocked on write */
 
@@ -145,8 +146,8 @@ static fd_set SavedClientsWithInput;
 static int auditTrailLevel = 1;
 
 int GrabInProgress = 0;
-int ConnectionTranslation[MAXSOCKS];
-int ConnectionOutputTranslation[MAXSOCKS];
+int *ConnectionTranslation = NULL;
+int *ConnectionOutputTranslation = NULL;
 
 static XtransConnInfo  *ListenTransConns = NULL;
 static int             *ListenTransFds = NULL;
@@ -194,6 +195,54 @@ lookup_trans_conn (fd)
 }
 
 
+/* Set MaxClients and lastfdesc, and allocate ConnectionTranslation */
+
+void
+InitConnectionLimits()
+{
+    lastfdesc = -1;
+
+#ifndef __UNIXOS2__
+
+#if !defined(XNO_SYSCONF) && defined(_SC_OPEN_MAX)
+    lastfdesc = sysconf(_SC_OPEN_MAX) - 1;
+#endif
+
+#ifdef HAS_GETDTABLESIZE
+    if (lastfdesc < 0)
+	lastfdesc = getdtablesize() - 1;
+#endif
+
+#ifdef _NFILE
+    if (lastfdesc < 0)
+	lastfdesc = _NFILE - 1;
+#endif
+
+#else /* __UNIXOS2__ */
+    lastfdesc = 255;
+#endif
+
+    /* This is the fallback */
+    if (lastfdesc < 0)
+	lastfdesc = MAXSOCKS;
+
+    if (lastfdesc > MAXSELECT)
+	lastfdesc = MAXSELECT;
+
+    if (lastfdesc > 2 * MAXCLIENTS)
+    {
+	lastfdesc = 2 * MAXCLIENTS;
+	if (debug_conns)
+	    ErrorF( "REACHED MAXIMUM CLIENTS LIMIT %d\n", MAXCLIENTS);
+    }
+    MaxClients = lastfdesc;
+
+    ConnectionTranslation = (int *)xalloc((lastfdesc + 1) * sizeof(int));
+    ConnectionOutputTranslation = (int *)xalloc((lastfdesc + 1) * sizeof(int));
+    if (ConnectionTranslation == NULL || ConnectionOutputTranslation == NULL)
+	FatalError("failed to allocate ConnectionTranslation\n");
+}
+    
 /*
  * Create the socket(s) that clients will used for one server.
  */
@@ -295,6 +344,15 @@ CreateServerSockets(fds)
 	(void) fprintf (stderr, "Using port number '%s'\n", display);
 }
 
+void
+CloseServerSockets()
+{
+    int i;
+
+    for (i = 0; i < ListenTransCount; i++)
+	_LBXPROXYTransClose (ListenTransConns[i]);
+}
+
 /*****************
  * CreateWellKnownSockets
  *    Initialize the global connection file descriptor arrays
@@ -311,27 +369,8 @@ CreateWellKnownSockets()
     FD_ZERO(&LastSelectMask);
     FD_ZERO(&ClientsWithInput);
 
-    for (i=0; i<MAXSOCKS; i++) ConnectionTranslation[i] = 0;
-    for (i=0; i<MAXSOCKS; i++) ConnectionOutputTranslation[i] = 0;
-#ifdef XNO_SYSCONF
-#undef _SC_OPEN_MAX
-#endif
-#ifdef _SC_OPEN_MAX
-    lastfdesc = sysconf(_SC_OPEN_MAX) - 1;
-#else
-#ifdef hpux
-    lastfdesc = _NFILE - 1;
-#else
-    lastfdesc = getdtablesize() - 1;
-#endif
-#endif
-
-    if (lastfdesc > MAXSOCKS)
-    {
-	lastfdesc = MAXSOCKS;
-	if (debug_conns)
-	    ErrorF( "GOT TO END OF SOCKETS %d\n", MAXSOCKS);
-    }
+    for (i=0; i<MaxClients; i++) ConnectionTranslation[i] = 0;
+    for (i=0; i<MaxClients; i++) ConnectionOutputTranslation[i] = 0;
 
     FD_ZERO(&WellKnownConnections);
 
@@ -533,24 +572,28 @@ EstablishNewConnections(clientUnused, closure)
     ClientPtr clientUnused;
     pointer closure;
 {
-    fd_mask readyconnections;     /* mask of listeners that are ready */
+    fd_set readyconnections;      /* set of listeners that are ready */
     int curconn;                  /* fd of listener that's ready */
     register int newconn;         /* fd of new client */
     register ClientPtr client;
     fd_set tmask;
+    int i;
 
-    XFD_ANDSET (&tmask, (fd_set*)closure, &WellKnownConnections);
-    readyconnections = tmask.fds_bits[0];
-    if (!readyconnections)
+    XFD_ANDSET(&tmask, (fd_set*)closure, &WellKnownConnections);
+    XFD_COPYSET(&tmask, &readyconnections);
+    if (!XFD_ANYSET(&readyconnections))
 	return TRUE;
 
-    while (readyconnections) 
+    for (i = 0; i < howmany(XFD_SETSIZE, NFDBITS); i++)
     {
+      while (readyconnections.fds_bits[i])
+      {
 	XtransConnInfo trans_conn, new_trans_conn;
 	int status;
 
-	curconn = ffs (readyconnections) - 1;
-	readyconnections &= ~(1 << curconn);
+	curconn = ffs (readyconnections.fds_bits[i]) - 1;
+	readyconnections.fds_bits[i] &= ~(1L << curconn);
+	curconn += (i * (sizeof(fd_mask)*8));
 
 	if ((trans_conn = lookup_trans_conn (curconn)) == NULL)
 	    continue;
@@ -569,6 +612,7 @@ EstablishNewConnections(clientUnused, closure)
 	    _LBXPROXYTransClose(new_trans_conn);
 	    return FALSE;
 	}
+      }
     }
 
     return TRUE;
@@ -692,13 +736,13 @@ CheckConnections()
         while (mask)
     	{
 	    curoff = ffs (mask) - 1;
- 	    curclient = curoff + (i << 5);
+ 	    curclient = curoff + (i * (sizeof(fd_mask)*8));
             FD_ZERO(&tmask);
             FD_SET(curclient, &tmask);
             r = Select (curclient + 1, &tmask, NULL, NULL, &notime);
             if (r < 0)
 		CloseDownClient(clients[ConnectionTranslation[curclient]]);
-	    mask &= ~(1 << curoff);
+	    mask &= ~(1L << curoff);
 	}
     }	
 }

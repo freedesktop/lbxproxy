@@ -48,6 +48,7 @@ from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/cmap.c,v 1.6 2001/12/14 20:00:50 dawes Exp $ */
 
 #include	<stdio.h>
 #include	"assert.h"
@@ -225,8 +226,9 @@ typedef struct _bignum {
     BigNumLower	lower;
 } BigNumRec, *BigNumPtr;
 
-#define BigNumGreater(x,y) ((x)->upper > (y)->upper ||\
-			    (x)->upper == (y)->upper && (x)->lower > (y)->lower)
+#define BigNumGreater(x,y) (((x)->upper > (y)->upper) ||\
+			    (((x)->upper == (y)->upper) &&\
+			     ((x)->lower > (y)->lower)))
 
 #define UnsignedToBigNum(u,r)	(((r)->upper = UPPERPART(u)), \
 				 ((r)->lower = LOWERPART(u)))

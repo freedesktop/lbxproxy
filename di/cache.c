@@ -46,6 +46,7 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/cache.c,v 1.6 2001/12/14 20:00:50 dawes Exp $ */
 #include	"misc.h"
 #include	"util.h"
 #include	"cache.h"
@@ -225,7 +226,7 @@ flush_cache(cache, needed)
     CachePtr    cache;
     unsigned long needed;
 {
-    CacheEntryPtr cp, *prev, oldest, *oldprev;
+    CacheEntryPtr cp, *prev, oldest, *oldprev = NULL;
     int i;
 
     while ((cache->cursize + needed) > cache->maxsize) {

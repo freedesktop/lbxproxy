@@ -45,6 +45,7 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/include/wire.h,v 1.7 2001/12/14 20:00:56 dawes Exp $ */
 
 #ifdef DEBUG 		/* Need this here because lbx.h undef's DEBUG */
 extern int lbxDebug;
@@ -263,16 +264,6 @@ extern void WriteReqToServer(
 #endif
 );
 
-extern void WriteToServer(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/,
-    int /*len*/,
-    char * /*buf*/,
-    Bool /*startOfRequest*/,
-    Bool /*checkLargeRequest*/
-#endif
-);
-
 extern void _write_to_server(
 #if NeedFunctionPrototypes
     ClientPtr /*client*/,
@@ -281,6 +272,16 @@ extern void _write_to_server(
     char* /*buf*/,
     Bool /*checkLarge*/,
     Bool /*startOfRequest*/
+#endif
+);
+
+extern void WriteToServer(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/,
+    int /*len*/,
+    char * /*buf*/,
+    Bool /*startOfRequest*/,
+    Bool /*checkLargeRequest*/
 #endif
 );
 
@@ -325,6 +326,17 @@ extern void SendIncrementPixel(
     ClientPtr /*client*/,
     XID /*cmap*/,
     unsigned long /*pixel*/
+#endif
+);
+
+extern void SendAllocColor(
+#if NeedFunctionPrototypes
+    ClientPtr /* pClient */,
+    XID       /* cmap */,
+    CARD32    /* pixel */,
+    CARD16    /* red */,
+    CARD16    /* green */,
+    CARD16    /* blue */
 #endif
 );
 

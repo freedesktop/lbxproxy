@@ -45,6 +45,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/programs/lbxproxy/di/utils.c,v 1.15 2002/12/09 04:10:58 tsi Exp $ */
 
 #include "lbx.h"
 #include <stdio.h>
@@ -62,18 +63,13 @@ SOFTWARE.
 #undef _POSIX_SOURCE
 #endif
 #endif
-#ifndef SYSV
+#if !defined(SYSV) && !defined(Lynx) && !defined(QNX4)
 #include <sys/resource.h>
 #endif
 
-/* lifted from Xt/VarargsI.h */
-#if NeedVarargsPrototypes
 #include <stdarg.h>
-#endif
 
-#if NeedVarargsPrototypes
-static void VErrorF(char*, va_list);
-#endif
+static void VErrorF(const char*, va_list);
 
 #ifdef SIGNALRETURNSINT
 #define SIGVAL int
@@ -85,6 +81,8 @@ static void VErrorF(char*, va_list);
 #include "wire.h"
 #include "atomcache.h"
 #include "proxyopts.h"
+
+#include <stdlib.h>
 
 /*
  * External declarations not in header files
@@ -194,7 +192,7 @@ AutoResetServer (sig)
     isItTimeToYield = TRUE;
 #ifdef GPROF
     chdir ("/tmp");
-    exit (0);
+    _exit (0);
 #endif
 #ifdef SYSV
     signal (SIGHUP, AutoResetServer);
@@ -275,7 +273,7 @@ void UseMsg()
 
 void
 ShowHelpAndExit (status)
-
+    int status;
 {
     UseMsg ();
     exit (status);
@@ -638,27 +636,13 @@ OsInitAllocator ()
 #endif
 }
 
-/*VARARGS1*/
 void
-AuditF(
-#if NeedVarargsPrototypes
-    char * f, ...)
-#else
- f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9) /* limit of ten args */
-    char *f;
-    char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9;
-#endif
+AuditF(const char * f, ...)
 {
 #ifdef notyet		/* ever ? */
-#ifdef X_NOT_STDC_ENV
-    long tm;
-#else
     time_t tm;
-#endif
     char *autime, *s;
-#if NeedVarargsPrototypes
     va_list args;
-#endif
 
     if (*f != ' ')
     {
@@ -672,72 +656,38 @@ AuditF(
 	    s = argvGlobal[0];
 	ErrorF("AUDIT: %s: %d %s: ", autime, getpid(), s);
     }
-#if NeedVarargsPrototypes
     va_start(args, f);
     VErrorF(f, args);
     va_end(args);
-#else
-    ErrorF(f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9);
-#endif
 #endif
 }
 
-/*VARARGS1*/
 void
-FatalError(
-#if NeedVarargsPrototypes
-    char *f, ...)
-#else
-f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9) /* limit of ten args */
-    char *f;
-    char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9;
-#endif
+FatalError(const char *f, ...)
 {
-#if NeedVarargsPrototypes
     va_list args;
-#endif
     ErrorF("\nFatal lbxproxy error: ");
-#if NeedVarargsPrototypes
     va_start(args, f);
     VErrorF(f, args);
     va_end(args);
-#else
-    ErrorF(f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9);
-#endif
     ErrorF("\n");
     AbortServer();
     /*NOTREACHED*/
 }
 
-#if NeedVarargsPrototypes
 static void
-VErrorF(f, args)
-    char *f;
-    va_list args;
+VErrorF(const char *f, va_list args)
 {
     vfprintf(stderr, f, args);
 }
-#endif
 
-/*VARARGS1*/
 void
-ErrorF(
-#if NeedVarargsPrototypes
-    char * f, ...)
-#else
- f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9) /* limit of ten args */
-    char *f;
-    char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9;
-#endif
+ErrorF(const char * f, ...)
 {
-#if NeedVarargsPrototypes
     va_list args;
     va_start(args, f);
     VErrorF(f, args);
     va_end(args);
-#else
-    fprintf( stderr, f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9);
-#endif
 }
 
 char *
@@ -918,6 +868,41 @@ ClientIsAsleep (client)
     return FALSE;
 }
 
+#ifdef __UNIXOS2__
+/* This code is duplicated from XLibInt.c, because the same problems with
+ * the drive letter as in clients also exist in the server
+ * Unfortunately the standalone servers don't link against libX11
+ */
+
+char *__XOS2RedirRoot(char *fname)
+{
+    /* This adds a further redirection by allowing the ProjectRoot
+     * to be prepended by the content of the envvar X11ROOT.
+     * This is for the purpose to move the whole X11 stuff to a different
+     * disk drive.
+     * The feature was added despite various environment variables
+     * because not all file opens respect them.
+     */
+    static char redirname[300]; /* enough for long filenames */
+    char *root;
+
+    /* if name does not start with /, assume it is not root-based */
+    if (fname==0 || !(fname[0]=='/' || fname[0]=='\\'))
+	return fname;
+
+    root = (char*)getenv("X11ROOT");
+    if (root==0 || 
+	(fname[1]==':' && isalpha(fname[0]) ||
+        (strlen(fname)+strlen(root)+2) > 300))
+	return fname;
+    sprintf(redirname,"%s%s",root,fname);
+    return redirname;
+}
+#endif
+
+
+
+
 
 void
 LBXReadAtomsFile (server)
@@ -936,6 +921,9 @@ LBXReadAtomsFile (server)
     server->atom_control = NULL;
     min_keep_prop_size = DEF_KEEP_PROP_SIZE;
 
+#ifdef __UNIXOS2__
+    atomsFile = (char*)__XOS2RedirRoot(atomsFile);
+#endif
     if (!(f = fopen (atomsFile, "r"))) {
 	ErrorF ("Could not load atom control file: %s\n", atomsFile);
 	return;

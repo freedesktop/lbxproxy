@@ -48,6 +48,7 @@ from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/cmaputil.c,v 1.11 2002/05/31 18:46:07 dawes Exp $ */
 
 #include	<stdio.h>
 #include	"misc.h"
@@ -134,7 +135,7 @@ GetVisual(vid)
  * beware of too-small buffers
  */
 
-void
+static void
 CopyISOLatin1Lowered(dest, source, length)
     register unsigned char *dest, *source;
     int length;
@@ -191,7 +192,7 @@ lookup(name, len, create)
      Bool create;
 {
   unsigned int h = 0, g;
-  dbEntryPtr   entry, *prev;
+  dbEntryPtr   entry, *prev = NULL;
   char         *str = name;
 
   if (!(name = (char*)ALLOCATE_LOCAL(len +1))) return NULL;
@@ -243,6 +244,9 @@ InitColors()
       return TRUE;
   if (!have_rgb_db)
     {
+#ifdef __UNIXOS2__
+      rgbPath = (char*)__XOS2RedirRoot(rgbPath);
+#endif
       path = (char*)ALLOCATE_LOCAL(strlen(rgbPath) +5);
       strcpy(path, rgbPath);
       strcat(path, ".txt");
@@ -430,8 +434,6 @@ DestroyColormap(client, value, id)
     XID		id;
 {
     ColormapPtr pmap = (ColormapPtr)value;
-    xfree(pmap->blue);
-    xfree(pmap->green);
     xfree(pmap);
     return Success;
 }

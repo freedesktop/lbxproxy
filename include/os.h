@@ -27,6 +27,8 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
+/* $XFree86: xc/programs/lbxproxy/include/os.h,v 1.7 2001/12/14 20:00:55 dawes Exp $ */
+
 #ifndef OS_H
 #define OS_H
 
@@ -55,9 +57,21 @@ extern Bool NewOutputPending;
 extern Bool AnyClientsWriteBlocked;
 extern int GrabInProgress;
 
+extern void InitConnectionLimits(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
+
 extern void CreateServerSockets(
 #if NeedFunctionPrototypes
     int * /*listen_fds[]*/
+#endif
+);
+
+extern void CloseServerSockets(
+#if NeedFunctionPrototypes
+    void
 #endif
 );
 

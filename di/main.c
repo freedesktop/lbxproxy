@@ -45,7 +45,9 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/programs/lbxproxy/di/main.c,v 1.9 2001/12/14 20:00:51 dawes Exp $ */
 
+#include <stdlib.h>
 #include "lbx.h"
 #include "wire.h"
 #include "atomcache.h"
@@ -81,6 +83,8 @@ main (argc, argv)
     display = "63";
 
     ProcessCommandLine (argc, argv);
+
+    InitConnectionLimits();
 
     AdjustProcVector();
 
@@ -128,6 +132,7 @@ main (argc, argv)
         FreeColors();
         FreeTags();
     }
+    CloseServerSockets();
     exit (0);
 }
 

@@ -45,6 +45,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/programs/lbxproxy/os/io.c,v 1.10 2001/12/14 20:00:58 dawes Exp $ */
 /*****************************************************************
  * i/o functions
  *
@@ -56,9 +57,6 @@ SOFTWARE.
 #include <stdio.h>
 #include <X11/Xtrans.h>
 #include "Xos.h"
-#ifdef X_NOT_STDC_ENV
-extern int errno;
-#endif
 #include "misc.h"
 #include <errno.h>
 #include <sys/param.h>
@@ -86,9 +84,6 @@ extern int errno;
 #endif
 
 extern void MarkClientException();
-extern int ConnectionTranslation[];
-extern int ConnectionOutputTranslation[];
-
 static int timesThisConnection = 0;
 static ConnectionInputPtr FreeInputs = (ConnectionInputPtr)NULL;
 static ConnectionOutputPtr FreeOutputs = (ConnectionOutputPtr)NULL;
@@ -887,7 +882,7 @@ LbxFlushClient(who, oc, extraBuf, extraCount)
 	    }
 	    if (oc->output) {
 		if (extraCount) {
-		    int len = obuf->count + (extraCount + 3) & ~3;
+		    int len = (obuf->count + extraCount + 3) & ~3;
 		    if (ExpandOutputBuffer(obuf, len) < 0) {
 			if (oc->trans_conn) {
 			    _LBXPROXYTransDisconnect(oc->trans_conn);
@@ -933,7 +928,8 @@ LbxFlushClient(who, oc, extraBuf, extraCount)
 void
 FlushAllOutput()
 {
-    register int index, base, mask;
+    register int index, base;
+    register fd_mask mask;
     OsCommPtr oc;
     register ClientPtr client;
 
@@ -955,7 +951,7 @@ FlushAllOutput()
 	{
 	    index = ffs(mask) - 1;
 	    mask &= ~lowbit(mask);
-	    if ((index = ConnectionOutputTranslation[(base << 5) + index]) == 0)
+	    if ((index = ConnectionOutputTranslation[(base * (sizeof(fd_mask)*8)) + index]) == 0)
 		continue;
 	    client = clients[index];
 	    if (client->clientGone)
