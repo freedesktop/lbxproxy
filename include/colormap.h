@@ -199,47 +199,6 @@ extern Bool InitColors(
     void
 );
 
-extern void ReleaseCmap(
-#if NeedFunctionPrototypes
-    ClientPtr	/* client */,
-    ColormapPtr	/* pmap */
-#endif
-);
-
-extern int CreateColormap(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/,
-    Colormap /*cmap*/,
-    VisualID /*visual*/
-#endif
-);
-
-extern int FreeColormap(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/,
-    Colormap /*cmap*/
-#endif
-);
-
-extern int CreateVisual(
-#if NeedFunctionPrototypes
-    int /*depth*/,
-    xVisualType * /*vis*/
-#endif
-);
-
-extern LbxVisualPtr GetVisual(
-#if NeedFunctionPrototypes
-     VisualID /*vid*/
-#endif
-);
-
-extern Bool InitColors(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
 extern RGBEntryPtr FindColorName(
     XServerPtr /*server*/,
     char * /*name*/,

@@ -67,12 +67,6 @@ extern void CloseServerSockets(
     void
 );
 
-extern void CloseServerSockets(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
 extern void CreateWellKnownSockets(
     void
 );
