@@ -1,3 +1,4 @@
+/* $XdotOrg: options.c,v 1.4 2001/02/09 02:05:31 xorgcvs Exp $ */
 /* $Xorg: options.c,v 1.4 2001/02/09 02:05:31 xorgcvs Exp $ */
 /*
 
@@ -46,7 +47,7 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-/* $XFree86: xc/programs/lbxproxy/di/options.c,v 1.8 2003/09/13 21:33:10 dawes Exp $ */
+/* $XFree86: xc/programs/lbxproxy/di/options.c,v 1.9 2003/12/19 02:05:39 dawes Exp $ */
 
 #include <stdio.h>
 #include "X.h"
@@ -682,7 +683,7 @@ LbxLookupBitmapCompMethod (server, methodOpCode)
     {
 	LbxBitmapCompMethod *method;
 
-	method = &server->LbxBitmapCompMethods[server->lbxNegOpt.bitmapCompMethods[i]];
+	method = &server->LbxBitmapCompMethods[(int)(server->lbxNegOpt.bitmapCompMethods[i])];
 
 	if (method->methodOpCode == methodOpCode)
 	    return (method);
@@ -704,7 +705,7 @@ LbxLookupPixmapCompMethod (server, methodOpCode)
     {
 	LbxPixmapCompMethod *method;
 
-	method = &server->LbxPixmapCompMethods[server->lbxNegOpt.pixmapCompMethods[i]];
+	method = &server->LbxPixmapCompMethods[(int)(server->lbxNegOpt.pixmapCompMethods[i])];
 
 	if (method->methodOpCode == methodOpCode)
 	    return (method);
@@ -722,7 +723,7 @@ LbxFindPreferredBitmapCompMethod (server)
     if (server->lbxNegOpt.numBitmapCompMethods == 0)
 	return NULL;
     else
-	return (&server->LbxBitmapCompMethods[server->lbxNegOpt.bitmapCompMethods[0]]);
+	return (&server->LbxBitmapCompMethods[(int)(server->lbxNegOpt.bitmapCompMethods[0])]);
 }
 
 
@@ -742,7 +743,7 @@ LbxFindPreferredPixmapCompMethod (server, format, depth)
 
 	for (i = 0; i < server->lbxNegOpt.numPixmapCompMethods; i++)
 	{
-	    method = &server->LbxPixmapCompMethods[server->lbxNegOpt.pixmapCompMethods[i]];
+	    method = &server->LbxPixmapCompMethods[(int)(server->lbxNegOpt.pixmapCompMethods[i])];
 
 	    if ((method->formatMask & (1 << format)))
 	    {
