@@ -441,7 +441,9 @@ PMprocessMessages (iceConn, clientData, opcode, length,
 	    (void)memset(&hints, 0, sizeof(hints));
 	    hints.ai_flags = AI_CANONNAME;
 	    if (bracketed == True) {
+#ifdef AI_NUMERICHOST
 		hints.ai_flags |= AI_NUMERICHOST;
+#endif
 		addrtype = AF_INET6;
 	    } else if (protocol != NULL) {
 		if (strcmp(protocol, "inet") == 0) {
