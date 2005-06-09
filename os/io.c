@@ -55,7 +55,7 @@ SOFTWARE.
  *****************************************************************/
 
 #include <stdio.h>
-#include <X11/Xtrans.h>
+#include <X11/Xtrans/Xtrans.h>
 #include "Xos.h"
 #include "misc.h"
 #include <errno.h>
