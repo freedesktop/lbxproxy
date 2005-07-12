@@ -56,7 +56,7 @@ SOFTWARE.
 
 #include <stdio.h>
 #include <X11/Xtrans/Xtrans.h>
-#include "Xos.h"
+#include <X11/Xos.h>
 #include "misc.h"
 #include <errno.h>
 #include <sys/param.h>
@@ -67,7 +67,7 @@ SOFTWARE.
 #include "lbx.h"
 
 #ifdef BIGREQS
-#include "bigreqstr.h"
+#include <X11/extensions/bigreqstr.h>
 #endif
 
 /* check for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX

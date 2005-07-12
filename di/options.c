@@ -50,16 +50,16 @@ in this Software without prior written authorization from The Open Group.
 /* $XFree86: xc/programs/lbxproxy/di/options.c,v 1.8 2003/09/13 21:33:10 dawes Exp $ */
 
 #include <stdio.h>
-#include "X.h"
+#include <X11/X.h>
 #include "misc.h"
-#include "XLbx.h"
-#include "lbxopts.h"
+#include <X11/extensions/XLbx.h>
+#include <X11/extensions/lbxopts.h>
 #include "proxyopts.h"
-#include "lbximage.h"
+#include <X11/extensions/lbximage.h>
 #include "util.h"
 #include "colormap.h"
 #ifndef NO_ZLIB
-#include "lbxzlib.h"
+#include <X11/extensions/lbxzlib.h>
 #endif /* NO_ZLIB */
 #include "wire.h"
 
