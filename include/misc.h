@@ -60,8 +60,8 @@ typedef struct _XServer *XServerPtr;
 extern int nextFreeClientID; 
 extern int nClients;
 extern char *display_name;
-extern char dispatchException;
-extern char isItTimeToYield;
+extern volatile char dispatchException;
+extern volatile char isItTimeToYield;
 extern int MaxClients;
 
 /* The following byte swapping tools are duplicated in several places.
