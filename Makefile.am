@@ -21,9 +21,9 @@
 
 bin_PROGRAMS = lbxproxy
 
-lbxproxy_CFLAGS = $(DEP_CFLAGS) -I$(top_srcdir)/include	\
+lbxproxy_CFLAGS = $(LBXPROXY_CFLAGS) -I$(top_srcdir)/include	\
 	-DDEF_ATOMS_FILE=\"$(libdir)/X11/lbxproxy/AtomControl\" -D_BSD_SOURCE
-lbxproxy_LDADD = $(DEP_LIBS)
+lbxproxy_LDADD = $(LBXPROXY_LIBS)
 
 lbxproxy_SOURCES = \
 	di/atomcache.c		\

@@ -32,9 +32,9 @@ AC_PROG_CC
 AC_PROG_INSTALL
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(DEP, xtrans xext lbxutil x11 ice xproxymngproto)
-AC_SUBST(DEP_CFLAGS)
-AC_SUBST(DEP_LIBS)
+PKG_CHECK_MODULES(LBXPROXY, xtrans xext lbxutil x11 ice xproxymngproto)
+AC_SUBST(LBXPROXY_CFLAGS)
+AC_SUBST(LBXPROXY_LIBS)
 
 # Transport selection macro from xtrans.m4
 XTRANS_CONNECTION_FLAGS
