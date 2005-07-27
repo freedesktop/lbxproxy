@@ -30,8 +30,8 @@ AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_CANONICAL_HOST
 
-# Checks for pkg-config packages
 case $host_os in
     linux*)
         OS_CFLAGS="-D_XOPEN_SOURCE"
@@ -41,8 +41,9 @@ case $host_os in
         ;;
 esac
 
+# Checks for pkg-config packages
 PKG_CHECK_MODULES(LBXPROXY, xtrans xext lbxutil x11 ice xproxymngproto)
-LBXPROXY_CFLAGS="$LBXPROXY_CFLAGS $OS_FLAGS"
+LBXPROXY_CFLAGS="$LBXPROXY_CFLAGS $OS_CFLAGS"
 AC_SUBST(LBXPROXY_CFLAGS)
 AC_SUBST(LBXPROXY_LIBS)
 
