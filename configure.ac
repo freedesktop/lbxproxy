@@ -32,7 +32,17 @@ AC_PROG_CC
 AC_PROG_INSTALL
 
 # Checks for pkg-config packages
+case $host_os in
+    linux*)
+        OS_CFLAGS="-D_XOPEN_SOURCE"
+        ;;
+    *)
+        OS_CFLAGS=
+        ;;
+esac
+
 PKG_CHECK_MODULES(LBXPROXY, xtrans xext lbxutil x11 ice xproxymngproto)
+LBXPROXY_CFLAGS="$LBXPROXY_CFLAGS $OS_FLAGS"
 AC_SUBST(LBXPROXY_CFLAGS)
 AC_SUBST(LBXPROXY_LIBS)
 
