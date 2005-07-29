@@ -22,7 +22,7 @@ dnl
 dnl Process this file with autoconf to create configure.
 
 AC_PREREQ([2.57])
-AC_INIT(lbxproxy,[7.0], [xorg@freedesktop.org],lbxproxy)
+AC_INIT(lbxproxy,[0.99.0], [https://bugs.freedesktop.org/enter_bug.cgi?product=xorg],lbxproxy)
 AM_INIT_AUTOMAKE([dist-bzip2])
 AM_MAINTAINER_MODE
 
@@ -51,5 +51,7 @@ AC_SUBST(LBXPROXY_LIBS)
 XTRANS_CONNECTION_FLAGS
 
 AC_CHECK_LIB(z,deflate)
+
+XORG_RELEASE_VERSION
 
 AC_OUTPUT([Makefile])
