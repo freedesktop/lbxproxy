@@ -78,6 +78,6 @@ lbxproxy_SOURCES = \
 	include/util.h		\
 	include/wire.h
 
-dist_man_MANS = \
+dist_man1_MANS = \
         lbxproxy.man
 
