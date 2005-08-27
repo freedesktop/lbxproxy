@@ -1,4 +1,5 @@
 /* $Xorg: io.c,v 1.6 2001/02/09 02:05:33 xorgcvs Exp $ */
+/* $XdotOrg: $ */
 /***********************************************************
 
 Copyright 1987, 1989, 1998  The Open Group
@@ -112,13 +113,13 @@ StandardRequestLength(req,client,got,partp)
 {
     int	    len;
     
-    if (!req)
-	req = (xReq *) client->requestBuffer;
     if (got < sizeof (xReq))
     {
 	*partp = TRUE;
 	return sizeof (xReq);
     }
+    if (!req)
+	req = (xReq *) client->requestBuffer;
     len = get_req_len(req,client);
     if (len > MAXBUFSIZE)
     {
@@ -984,7 +985,7 @@ StandardWriteToClient (who, count, buf)
     register ConnectionOutputPtr oco = oc->output;
     int padBytes;
 
-    if (!count)
+    if (!count || !buf)
 	return(0);
 
     if (!oco)

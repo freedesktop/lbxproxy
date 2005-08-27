@@ -1,4 +1,5 @@
 /* $Xorg: misc.h,v 1.4 2001/02/09 02:05:32 xorgcvs Exp $ */
+/* $XdotOrg: $ */
 
 /*
 
@@ -110,5 +111,9 @@ extern int MaxClients;
 
 #define REQUEST(type) \
 	register type *stuff = (type *)client->requestBuffer
+
+#define REQUEST_SIZE_MATCH(req) \
+    if ((sizeof(req) >> 2) != client->req_len) \
+	return (BadLength)
 
 #endif
