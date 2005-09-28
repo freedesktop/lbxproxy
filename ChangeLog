@@ -1,0 +1,5 @@
+2005-09-28  Kristian Høgsberg  <krh@redhat.com>
+
+	* Makefile.am (EXTRA_DIST): add design and lbxproxy.def.
+
+	* README: Copy first two paragraphs from man page.

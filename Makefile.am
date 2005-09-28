@@ -81,3 +81,6 @@ lbxproxy_SOURCES = \
 dist_man1_MANS = \
         lbxproxy.man
 
+EXTRA_DIST = \
+	design \
+	lbxproxy.def
