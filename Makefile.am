@@ -81,6 +81,9 @@ lbxproxy_SOURCES = \
 dist_man1_MANS = \
         lbxproxy.man
 
+configdir = $(libdir)/X11/lbxproxy
+dist_config_DATA = config/AtomControl
+
 EXTRA_DIST = \
 	design \
 	lbxproxy.def
