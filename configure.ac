@@ -42,7 +42,7 @@ case $host_os in
 esac
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(LBXPROXY, xtrans xext lbxutil x11 ice xproxymngproto)
+PKG_CHECK_MODULES(LBXPROXY, xtrans xext lbxutil x11 ice xproxymngproto bigreqsproto)
 LBXPROXY_CFLAGS="$LBXPROXY_CFLAGS $OS_CFLAGS"
 AC_SUBST(LBXPROXY_CFLAGS)
 AC_SUBST(LBXPROXY_LIBS)
