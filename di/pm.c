@@ -383,7 +383,7 @@ PMprocessMessages (iceConn, clientData, opcode, length,
 	if (colon)
 	{
 #if defined(IPv6) && defined(AF_INET6)
-	    struct addrinfo *ai, hints;
+	    struct addrinfo *ai = NULL, hints;
 	    Bool bracketed = False;
 	    char canonaddr[INET6_ADDRSTRLEN];
 	    int addrtype = AF_UNSPEC;
