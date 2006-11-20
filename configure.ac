@@ -33,7 +33,7 @@ AC_PROG_INSTALL
 AC_CANONICAL_HOST
 
 case $host_os in
-    linux*)
+    linux*|gnu*|*-gnu)
         OS_CFLAGS="-D_XOPEN_SOURCE"
         ;;
     *)
