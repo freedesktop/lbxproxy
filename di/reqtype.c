@@ -292,9 +292,7 @@ static char cause_events[] = {
 
 
 Bool
-GeneratesEvents(client, req)
-    ClientPtr	client;
-    xReq       *req;
+GeneratesEvents(ClientPtr client, xReq *req)
 {
     if (req->reqType > X_NoOperation)
 	return CheckExtensionForEvents(client, req);
@@ -302,9 +300,7 @@ GeneratesEvents(client, req)
 }
 
 int
-GeneratesReplies(client, req)
-    ClientPtr	client;
-    xReq       *req;
+GeneratesReplies(ClientPtr client, xReq *req)
 {
     if (req->reqType > X_NoOperation)
 	return CheckExtensionForReplies(client, req);

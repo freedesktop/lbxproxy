@@ -85,6 +85,9 @@ typedef struct _vectors {
     SExtensionRequests sreq_vector;
 }           ExtensionVectors;
 
+extern int  (*InitialVector[3]) (
+    ClientPtr /* client */
+);
 extern int  (*ProcVector[256]) (
     ClientPtr /*client*/
 );
@@ -130,5 +133,21 @@ extern Bool CheckExtensionForReplies(
 extern int ProcLBXQueryExtension(
     ClientPtr /*client*/
 );
+
+extern char protocolMode;
+extern void (*ZeroPadReqVector[128])(void *);
+extern Bool lbxCompressImages;
+extern Bool lbxDoAtomShortCircuiting;
+extern Bool lbxDoLbxGfx;
+extern Bool lbxUseLbx;
+extern Bool lbxZeroPad;
+extern Bool resetAfterLastClient;
+extern Bool terminateAfterLastClient;
+
+extern int gfx_gc_hit;
+extern int gfx_gc_miss;
+extern int gfx_draw_hit;
+extern int gfx_draw_miss;
+extern int gfx_total;
 
 #endif				/* _LBXEXT_H_ */

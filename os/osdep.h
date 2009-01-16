@@ -124,20 +124,21 @@ typedef struct _connectionOutput {
     Bool nocompress;
 } ConnectionOutput, *ConnectionOutputPtr;
 
-typedef struct _osComm {
+typedef struct _osComm OsCommRec, *OsCommPtr;
+struct _osComm {
     int fd;
     ConnectionInputPtr input;
     ConnectionOutputPtr output;
     ConnectionOutputPtr ofirst;
     ConnectionOutputPtr olast;
-    void (*Close) ();
-    int  (*Writev) ();
-    int  (*Read) ();
-    int  (*flushClient) ();
-    void (*compressOff) ();
-    void (*compressOn) ();
+    void (*Close)(ClientPtr);
+    int  (*Writev)(int, void *, int);
+    int  (*Read)(int, void *, int);
+    int  (*flushClient)(ClientPtr, OsCommPtr, void *, int);
+    void (*compressOff)(int);
+    void (*compressOn)(int);
     struct _XtransConnInfo *trans_conn; /* transport connection object */
-} OsCommRec, *OsCommPtr;
+};
 
 #define FlushClient(who, oc, extraBuf, extraCount) \
     (*((OsCommPtr)((who)->osPrivate))->flushClient)(who, oc, extraBuf, extraCount)
@@ -149,14 +150,14 @@ extern void FreeOsBuffers(
 extern int StandardFlushClient(
     ClientPtr /*who*/,
     OsCommPtr /*oc*/,
-    char * /*extraBuf*/,
+    void * /*extraBuf*/,
     int /*extraCount*/
 );
 
 extern int LbxFlushClient(
     ClientPtr /*who*/,
     OsCommPtr /*oc*/,
-    char * /*extraBuf*/,
+    void * /*extraBuf*/,
     int /*extraCount*/
 );
 

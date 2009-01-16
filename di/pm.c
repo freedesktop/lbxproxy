@@ -60,8 +60,12 @@ from The Open Group.
 /*
  * Static definitions
  */
-static void PMprocessMessages ();
-static Status _ConnectToProxyManager ();
+static void
+PMprocessMessages(IceConn iceConn, IcePointer clientData, int opcode,
+		  unsigned long length, Bool swap,
+		  IceReplyWaitInfo *replyWait, Bool *replyReadyRet);
+static Status
+_ConnectToProxyManager(char *pmAddr, char *errorString);
 
 static int PMopcode;
 static int PMversionCount = 1;
@@ -101,8 +105,7 @@ Bool		proxyMngr;
 static IceIOErrorHandler prev_handler;
 
 static void
-MyIoErrorHandler (ice_conn)
-    IceConn ice_conn;
+MyIoErrorHandler(IceConn ice_conn)
 {
     if (prev_handler)
         (*prev_handler) (ice_conn);
@@ -112,7 +115,7 @@ MyIoErrorHandler (ice_conn)
 }
 
 static void
-InstallIOErrorHandler ()
+InstallIOErrorHandler(void)
 {
     IceIOErrorHandler default_handler;
 
@@ -124,7 +127,7 @@ InstallIOErrorHandler ()
 
 
 Bool
-CheckForProxyManager ()
+CheckForProxyManager(void)
 {
     if (getenv ("PROXY_MANAGER"))
 	return 1;
@@ -133,7 +136,7 @@ CheckForProxyManager ()
 }
 
 void
-ConnectToProxyManager ()
+ConnectToProxyManager(void)
 {
     char    *proxyManagerAddr;
     char    errorString[ERROR_STRING_SIZE];
@@ -154,9 +157,7 @@ ConnectToProxyManager ()
 
 
 static Status
-_ConnectToProxyManager (pmAddr, errorString)
-    char *pmAddr;
-    char *errorString;
+_ConnectToProxyManager(char *pmAddr, char *errorString)
 {
     IceProtocolSetupStatus	setupstat;
     char			*vendor = NULL;
@@ -268,8 +269,7 @@ SendGetProxyAddrReply (
 
 
 static int
-casecmp (str1, str2)
-    char *str1, *str2;
+casecmp(char *str1, char *str2)
 {
     char buf1[512],buf2[512];
     char c, *s;
@@ -297,15 +297,9 @@ casecmp (str1, str2)
 
 /* ARGSUSED */
 static void
-PMprocessMessages (iceConn, clientData, opcode, length, 
-		   swap, replyWait, replyReadyRet)
-    IceConn		 iceConn;
-    IcePointer       clientData;
-    int		 opcode;
-    unsigned long	 length;
-    Bool		 swap;
-    IceReplyWaitInfo *replyWait;
-    Bool		 *replyReadyRet;
+PMprocessMessages(IceConn iceConn, IcePointer clientData, int opcode,
+		  unsigned long length, Bool swap,
+		  IceReplyWaitInfo *replyWait, Bool *replyReadyRet)
 {
     switch (opcode)
     {
@@ -602,7 +596,7 @@ PMprocessMessages (iceConn, clientData, opcode, length,
 }
 
 void
-HandleProxyManagerConnection ()
+HandleProxyManagerConnection(void)
 {
     /*
      * If an IO error occurs, the IO error handler will output

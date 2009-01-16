@@ -65,13 +65,24 @@ from The Open Group.
 #include	"reqtype.h"
 #include	"lbxext.h"
 
-static void LocalAllocColor ();
-static void FoundPixel ();
-static Bool grab_cmap_reply();
-static Bool alloc_named_color_reply();
-static Bool alloc_color_cells_reply();
-static Bool alloc_color_planes_reply();
-static Bool lookup_color_reply();
+static void
+LocalAllocColor(ClientPtr client, Bool in_reply, ColormapPtr pmap,
+		CARD16 red, CARD16 green, CARD16 blue, Bool alloc_named,
+		CARD16 xred, CARD16 xgreen, CARD16 xblue);
+static void
+FoundPixel (ClientPtr client, Bool in_reply, ColormapPtr pmap, Entry *pent,
+	    Bool alloc_named, CARD16 xred, CARD16 xgreen, CARD16 xblue);
+static Bool
+grab_cmap_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+alloc_named_color_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+alloc_color_cells_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+alloc_color_planes_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+lookup_color_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+
 
 /* ------------------------------------------------------------------------- */
 
@@ -80,9 +91,7 @@ static Bool lookup_color_reply();
  */
 
 void
-ResolveColor (pVisual, red, green, blue)
-    LbxVisualPtr pVisual;
-    CARD16 *red, *green, *blue;
+ResolveColor (LbxVisualPtr pVisual, CARD16 *red, CARD16 *green, CARD16 *blue)
 {
     int shift = 16 - pVisual->bitsPerRGB;
     unsigned lim = (1 << pVisual->bitsPerRGB) - 1;
@@ -132,11 +141,7 @@ void (* LbxResolveColor)(
 ) = ResolveColor;
 
 static Pixel
-find_cell(pent, num, rgb, channel)
-    Entry *pent;
-    int num;
-    CARD32 rgb;
-    int channel;
+find_cell(Entry *pent, int num, CARD32 rgb, int channel)
 {
     Pixel pixel, freep;
 
@@ -169,9 +174,7 @@ find_cell(pent, num, rgb, channel)
  */
 
 Pixel
-FindFreePixel (pmap, red, green, blue)
-    ColormapPtr pmap;
-    CARD32 red, green, blue;
+FindFreePixel (ColormapPtr pmap, CARD32 red, CARD32 green, CARD32 blue)
 {
     Entry      *pent;
     Pixel	pixel, p;
@@ -234,8 +237,7 @@ typedef struct _bignum {
 				 ((r)->lower = BIGNUMLOWER-1))
 
 static void
-BigNumAdd (x, y, r)
-    BigNumPtr	x, y, r;
+BigNumAdd (BigNumPtr x, BigNumPtr y, BigNumPtr r)
 {
     BigNumLower	lower, carry = 0;
 
@@ -249,12 +251,8 @@ BigNumAdd (x, y, r)
 }
 
 Entry *
-FindBestPixel(pmap, red, green, blue, channels)
-    ColormapPtr	pmap;
-    CARD32	red,
-		green,
-		blue;
-    int		channels;
+FindBestPixel(ColormapPtr pmap, CARD32 red, CARD32 green, CARD32 blue,
+	      int channels)
 {
     Entry      *pent;
     int		num;
@@ -346,12 +344,8 @@ Entry * (* LbxFindBestPixel)(
         dst = (*ptr++ * 65535) / lim
 
 static CARD8 *
-DecodeChannel(pmap, pent, flags, channels, data)
-    ColormapPtr pmap;
-    Entry *pent;
-    CARD8 flags;
-    CARD8 channels;
-    CARD8 *data;
+DecodeChannel(ColormapPtr pmap, Entry *pent, CARD8 flags,
+	      CARD8 channels, CARD8 *data)
 {
     Bool px2;
     Bool rgb2;
@@ -479,10 +473,7 @@ DecodeChannel(pmap, pent, flags, channels, data)
 }
 
 static void
-GotColormapGrab (pmap, flags, data)
-    ColormapPtr pmap;
-    CARD8 flags;
-    CARD8 *data;
+GotColormapGrab (ColormapPtr pmap, CARD8 flags, CARD8 *data)
 {
 
     pmap->grab_status = CMAP_GRABBED;
@@ -525,12 +516,10 @@ GotColormapGrab (pmap, flags, data)
 }
 
 static void
-GrabCmap (client, pmap, red, green, blue, alloc_named, xred, xgreen, xblue)
-    ClientPtr client;
-    ColormapPtr pmap;
-    CARD16 red, green, blue;
-    Bool alloc_named;
-    CARD16 xred, xgreen, xblue;
+GrabCmap (ClientPtr client, ColormapPtr pmap,
+	  CARD16 red, CARD16 green, CARD16 blue,
+	  Bool alloc_named,
+	  CARD16 xred, CARD16 xgreen, CARD16 xblue)
 {
     xLbxGrabCmapReq req;
     ReplyStuffPtr nr;
@@ -572,10 +561,7 @@ GrabCmap (client, pmap, red, green, blue, alloc_named, xred, xgreen, xblue)
 }
 
 static Bool
-grab_cmap_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+grab_cmap_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xLbxGrabCmapReply *reply;
     Entry      *pent;
@@ -651,9 +637,7 @@ grab_cmap_reply(client, nr, data)
  */
 
 void
-ReleaseCmap (client, pmap)
-    ClientPtr client;
-    ColormapPtr pmap;
+ReleaseCmap (ClientPtr client, ColormapPtr pmap)
 {
     xLbxReleaseCmapReq req;
 
@@ -675,11 +659,8 @@ ReleaseCmap (client, pmap)
 /* ------------------------------------------------------------------------- */
 
 static void
-DoAllocColorReply (client, in_reply, red, green, blue, pixel)
-    ClientPtr client;
-    Bool in_reply;
-    CARD16 red, green, blue;
-    Pixel pixel;
+DoAllocColorReply (ClientPtr client, Bool in_reply,
+		   CARD16 red, CARD16 green, CARD16 blue, Pixel pixel)
 {
     /*
      * Prepare the AllocColor reply for the client.
@@ -735,13 +716,9 @@ DoAllocColorReply (client, in_reply, red, green, blue, pixel)
 }
 
 static void
-DoAllocNamedColorReply (client, in_reply, red, green, blue, pixel,
-			xred, xgreen, xblue)
-    ClientPtr client;
-    Bool in_reply;
-    CARD16 red, green, blue;
-    Pixel pixel;
-    CARD16 xred, xgreen, xblue;
+DoAllocNamedColorReply (ClientPtr client, Bool in_reply,
+			CARD16 red, CARD16 green, CARD16 blue, Pixel pixel,
+			CARD16 xred, CARD16 xgreen, CARD16 xblue)
 {
     /*
      * Prepare the AllocNamedColor reply for the client.
@@ -819,14 +796,9 @@ DoAllocNamedColorReply (client, in_reply, red, green, blue, pixel,
  */
 
 static void
-LocalAllocColor (client, in_reply, pmap, red, green, blue, alloc_named,
-		 xred, xgreen, xblue)
-    ClientPtr   client;
-    Bool	in_reply;
-    ColormapPtr pmap;
-    CARD16      red, green, blue;
-    Bool	alloc_named;
-    CARD16      xred, xgreen, xblue;
+LocalAllocColor (ClientPtr client, Bool in_reply, ColormapPtr pmap,
+		 CARD16 red, CARD16 green, CARD16 blue, Bool alloc_named,
+		 CARD16 xred, CARD16 xgreen, CARD16 xblue)
 {
     Pixel pixel;
 
@@ -886,13 +858,8 @@ LocalAllocColor (client, in_reply, pmap, red, green, blue, alloc_named,
 
 
 static void
-FoundPixel (client, in_reply, pmap, pent, alloc_named, xred, xgreen, xblue)
-    ClientPtr client;
-    Bool in_reply;
-    ColormapPtr pmap;
-    Entry *pent;
-    Bool alloc_named;
-    CARD16 xred, xgreen, xblue;
+FoundPixel (ClientPtr client, Bool in_reply, ColormapPtr pmap, Entry *pent,
+	    Bool alloc_named, CARD16 xred, CARD16 xgreen, CARD16 xblue)
 {
 #ifdef COLOR_DEBUG
     if (LBXCacheSafe (client))
@@ -936,8 +903,7 @@ FoundPixel (client, in_reply, pmap, pent, alloc_named, xred, xgreen, xblue)
 /* ------------------------------------------------------------------------- */
 
 int
-ProcLBXCreateColormap(client)
-    ClientPtr   client;
+ProcLBXCreateColormap(ClientPtr client)
 {
     REQUEST(xCreateColormapReq);
     Colormap    cmap;
@@ -959,9 +925,7 @@ ProcLBXCreateColormap(client)
 }
 
 static      ColormapPtr
-create_colormap(cmap, visual)
-    Colormap    cmap;
-    VisualID    visual;
+create_colormap(Colormap cmap, VisualID visual)
 {
     ColormapPtr pmap;
     LbxVisualPtr pvis;
@@ -1030,10 +994,7 @@ create_colormap(cmap, visual)
 
 /* ARGSUSED */
 Bool
-CreateColormap(client, cmap, visual)
-    ClientPtr   client;
-    Colormap    cmap;
-    VisualID    visual;
+CreateColormap(ClientPtr client, Colormap cmap, VisualID visual)
 {
     ColormapPtr pmap;
 
@@ -1047,8 +1008,7 @@ CreateColormap(client, cmap, visual)
 
 
 int
-ProcLBXFreeColormap(client)
-    ClientPtr   client;
+ProcLBXFreeColormap(ClientPtr client)
 {
     REQUEST(xResourceReq);
     Colormap    cmap;
@@ -1065,9 +1025,7 @@ ProcLBXFreeColormap(client)
 
 /* ARGSUSED */
 Bool
-FreeColormap(client, cmap)
-    ClientPtr   client;
-    Colormap    cmap;
+FreeColormap(ClientPtr client, Colormap cmap)
 {
     ColormapPtr pmap;
 
@@ -1084,8 +1042,7 @@ FreeColormap(client, cmap)
  * cop out: don't try to track the new colormap
  */
 int
-ProcLBXCopyColormapAndFree(client)
-    ClientPtr   client;
+ProcLBXCopyColormapAndFree(ClientPtr client)
 {
     REQUEST(xCopyColormapAndFreeReq);
     Colormap    srcmap;
@@ -1106,8 +1063,7 @@ ProcLBXCopyColormapAndFree(client)
 /* ------------------------------------------------------------------------- */
 
 int
-ProcLBXFreeColors(client)
-    ClientPtr   client;
+ProcLBXFreeColors(ClientPtr client)
 {
     REQUEST(xFreeColorsReq);
     int         num;
@@ -1161,8 +1117,7 @@ ProcLBXFreeColors(client)
 /* ------------------------------------------------------------------------- */
 
 int
-ProcLBXAllocColor(client)
-    ClientPtr   client;
+ProcLBXAllocColor(ClientPtr client)
 {
     REQUEST(xAllocColorReq);
     Entry      *pent;
@@ -1241,8 +1196,7 @@ ProcLBXAllocColor(client)
 /* ------------------------------------------------------------------------- */
 
 int
-ProcLBXAllocNamedColor(client)
-    ClientPtr   client;
+ProcLBXAllocNamedColor(ClientPtr client)
 {
     REQUEST(xAllocNamedColorReq);
     Entry      *pent;
@@ -1338,10 +1292,7 @@ ProcLBXAllocNamedColor(client)
 }
 
 static Bool
-alloc_named_color_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+alloc_named_color_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xAllocNamedColorReply *reply;
     Pixel       pixel;
@@ -1387,8 +1338,7 @@ alloc_named_color_reply(client, nr, data)
 /* ------------------------------------------------------------------------- */
 
 int
-ProcLBXAllocColorCells(client)
-    ClientPtr   client;
+ProcLBXAllocColorCells(ClientPtr client)
 {
     REQUEST(xAllocColorCellsReq);
     ReplyStuffPtr nr;
@@ -1436,10 +1386,7 @@ ProcLBXAllocColorCells(client)
 }
 
 static Bool
-alloc_color_cells_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+alloc_color_cells_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xAllocColorCellsReply *reply;
     CARD16 nPixels, nMasks;
@@ -1520,8 +1467,7 @@ alloc_color_cells_reply(client, nr, data)
 /* ------------------------------------------------------------------------- */
 
 int
-ProcLBXAllocColorPlanes(client)
-    ClientPtr   client;
+ProcLBXAllocColorPlanes(ClientPtr client)
 {
     REQUEST(xAllocColorPlanesReq);
     ReplyStuffPtr nr;
@@ -1569,10 +1515,7 @@ ProcLBXAllocColorPlanes(client)
 }
 
 static Bool
-alloc_color_planes_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+alloc_color_planes_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xAllocColorPlanesReply *reply;
     CARD32 redMask, greenMask, blueMask, mask;
@@ -1650,8 +1593,7 @@ alloc_color_planes_reply(client, nr, data)
 /* ------------------------------------------------------------------------- */
 
 int
-ProcLBXLookupColor(client)
-    ClientPtr   client;
+ProcLBXLookupColor(ClientPtr client)
 {
     REQUEST(xLookupColorReq);
     xLookupColorReply reply;
@@ -1736,10 +1678,7 @@ ProcLBXLookupColor(client)
 
 
 static Bool
-lookup_color_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+lookup_color_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xLookupColorReply *reply;
     RGBEntryRec rgbe;

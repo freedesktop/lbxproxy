@@ -83,7 +83,8 @@ SOFTWARE.
 #include "colormap.h"
 #include "wire.h"
 
-static void RebuildTable();
+static void
+RebuildTable(int client);
 
 #define INITBUCKETS 64
 #define INITHASHSIZE 6
@@ -108,7 +109,7 @@ static DeleteType *DeleteFuncs = (DeleteType *)NULL;
  */
 
 Bool
-InitDeleteFuncs()
+InitDeleteFuncs(void)
 {
     if (DeleteFuncs)
 	xfree(DeleteFuncs);
@@ -128,8 +129,7 @@ InitDeleteFuncs()
  *****************/
 
 Bool
-InitClientResources(client)
-    ClientPtr client;
+InitClientResources(ClientPtr client)
 {
     register int i, j;
  
@@ -156,9 +156,7 @@ InitClientResources(client)
 }
 
 void
-FinishInitClientResources(client, ridBase, ridMask)
-    ClientPtr client;
-    XID ridBase, ridMask;
+FinishInitClientResources(ClientPtr client, XID ridBase, XID ridMask)
 {
     client->ridBase = ridBase;
     client->ridMask = ridMask;
@@ -168,9 +166,7 @@ FinishInitClientResources(client, ridBase, ridMask)
 }
 
 static int
-Hash(client, id)
-    int client;
-    register XID id;
+Hash(int client, register XID id)
 {
     id &= clients[client]->ridMask;
     switch (clients[client]->server->clientTable[client].hashsize)
@@ -192,9 +188,8 @@ Hash(client, id)
 }
 
 static XID
-AvailableID(client, id, maxid, goodid)
-    register int client;
-    register XID id, maxid, goodid;
+AvailableID(register int client, register XID id,
+	    register XID maxid, register XID goodid)
 {
     register ResourcePtr res;
 
@@ -220,9 +215,9 @@ AvailableID(client, id, maxid, goodid)
  */
 
 XID
-FakeClientID(client)
-    register int client;	/* Index of a client for the global clients 
-				 * array and the server's clientTable */
+FakeClientID(register int client)	/* Index of a client for the global
+					 * clients array and the server's
+					 * clientTable */
 {
     register XID id, maxid;
     register ResourcePtr *resp;
@@ -261,11 +256,7 @@ FakeClientID(client)
 }
 
 Bool
-AddResource(pclient, id, type, value)
-    ClientPtr pclient;
-    XID id;
-    RESTYPE type;
-    pointer value;
+AddResource(ClientPtr pclient, XID id, RESTYPE type, pointer value)
 {
     int client;
     register ClientResourceRec *rrec;
@@ -300,8 +291,7 @@ AddResource(pclient, id, type, value)
 }
 
 static void
-RebuildTable(client)
-    int client;
+RebuildTable(int client)
 {
     register int j;
     register ResourcePtr res, next;
@@ -350,10 +340,7 @@ RebuildTable(client)
 }
 
 void
-FreeResource(client, id, skipDeleteFuncType)
-    ClientPtr client;
-    XID id;
-    RESTYPE skipDeleteFuncType;
+FreeResource(ClientPtr client, XID id, RESTYPE skipDeleteFuncType)
 {
     int		cid;
     register    ResourcePtr res;
@@ -393,8 +380,7 @@ FreeResource(client, id, skipDeleteFuncType)
 }
 
 void
-FreeClientResources(client)
-    ClientPtr client;
+FreeClientResources(ClientPtr client)
 {
     register ResourcePtr *resources;
     register ResourcePtr this;
@@ -444,7 +430,7 @@ FreeClientResources(client)
 }
 
 void
-FreeAllResources()
+FreeAllResources(void)
 {
     int	j;
 
@@ -459,10 +445,7 @@ FreeAllResources()
  *  LookupIDByType returns the object with the given id and type, else NULL.
  */ 
 pointer
-LookupIDByType(pclient, id, rtype)
-    ClientPtr pclient;
-    XID id;
-    RESTYPE rtype;
+LookupIDByType(ClientPtr pclient, XID id, RESTYPE rtype)
 {
     register    ResourcePtr res;
     int i, j;

@@ -68,13 +68,11 @@ typedef struct {
 
 static int  num_visuals = 0;
 
-LbxVisualPtr *visuals;
+static LbxVisualPtr *visuals;
 
 
 int
-CreateVisual(depth, vis)
-    int         depth;
-    xVisualType *vis;
+CreateVisual(int depth, xVisualType *vis)
 {
     LbxVisualPtr pvis;
 
@@ -112,8 +110,7 @@ CreateVisual(depth, vis)
 }
 
 LbxVisualPtr
-GetVisual(vid)
-    VisualID    vid;
+GetVisual(VisualID vid)
 {
     LbxVisualPtr pvis;
     int         i;
@@ -136,9 +133,8 @@ GetVisual(vid)
  */
 
 static void
-CopyISOLatin1Lowered(dest, source, length)
-    register unsigned char *dest, *source;
-    int length;
+CopyISOLatin1Lowered(register unsigned char *dest,
+		     register unsigned char *source, int length)
 {
     register int i;
 
@@ -228,7 +224,7 @@ extern char *rgbPath;
 static Bool have_rgb_db = FALSE;
 
 Bool
-InitColors()
+InitColors(void)
 {
   FILE       *rgb;
   char       *path;
@@ -291,10 +287,8 @@ InitColors()
 
 
 static Bool
-OsLookupColor(name, len, pred, pgreen, pblue)
-    char	   *name;
-    unsigned	   len;
-    unsigned short *pred, *pgreen, *pblue;
+OsLookupColor(char *name, unsigned len, unsigned short *pred,
+	      unsigned short *pgreen,  unsigned short *pblue)
 
 {
   dbEntryPtr entry;
@@ -316,9 +310,7 @@ OsLookupColor(name, len, pred, pgreen, pblue)
 
 
 static int
-Hash(name, len)
-    char       *name;
-    int         len;
+Hash(char *name, int len)
 {
     int         hash = 0;
 
@@ -330,11 +322,7 @@ Hash(name, len)
 }
 
 RGBEntryPtr
-FindColorName(server, name, len, pVisual)
-    XServerPtr	 server;
-    char        *name;
-    int          len;
-    LbxVisualPtr pVisual;
+FindColorName(XServerPtr server, char *name, int len, LbxVisualPtr pVisual)
 {
     RGBCacheEntryPtr ce;
     int hash;
@@ -375,11 +363,7 @@ FindColorName(server, name, len, pVisual)
 }
 
 Bool
-AddColorName(server, name, len, rgbe)
-    XServerPtr	server;
-    char       *name;
-    int         len;
-    RGBEntryRec *rgbe;
+AddColorName(XServerPtr server, char *name, int len, RGBEntryRec *rgbe)
 {
     RGBCacheEntryPtr new;
     int         hash;
@@ -401,7 +385,7 @@ AddColorName(server, name, len, rgbe)
 
 
 void
-FreeColors()
+FreeColors(void)
 {
     RGBCacheEntryPtr ce,
                 nce;
@@ -425,10 +409,7 @@ FreeColors()
 
 /* ARGSUSED */
 int
-DestroyColormap(client, value, id)
-    ClientPtr	client;
-    pointer	value;
-    XID		id;
+DestroyColormap(ClientPtr client, pointer value, XID id)
 {
     ColormapPtr pmap = (ColormapPtr)value;
     xfree(pmap);
@@ -438,14 +419,8 @@ DestroyColormap(client, value, id)
 /* ------------------------------------------------------------------------- */
 
 static int
-find_matching_pixel(pent, num, channels, red, green, blue, pe)
-    Entry      *pent;
-    int         num;
-    int		channels;
-    CARD32      red,
-                green,
-                blue;
-    Entry     **pe;
+find_matching_pixel(Entry *pent, int num, int channels,
+		    CARD32 red, CARD32 green, CARD32 blue, Entry **pe)
 {
     int         i;
 
@@ -492,13 +467,8 @@ find_matching_pixel(pent, num, channels, red, green, blue, pe)
 
 /* ARGSUSED */
 int
-FindPixel(client, pmap, red, green, blue, pent)
-    ClientPtr   client;
-    ColormapPtr pmap;
-    CARD32      red,
-                green,
-                blue;
-    Entry     **pent;
+FindPixel(ClientPtr client, ColormapPtr pmap, CARD32 red, CARD32 green,
+	  CARD32 blue, Entry **pent)
 {
     Entry *p;
 
@@ -563,10 +533,7 @@ FindPixel(client, pmap, red, green, blue, pent)
 }
 
 static int
-AddPixel(pclient, pmap, pixel)
-    ClientPtr   pclient;
-    ColormapPtr pmap;
-    Pixel pixel;
+AddPixel(ClientPtr pclient, ColormapPtr pmap, Pixel pixel)
 {
     colorResource *pcr;
     int         npix;
@@ -620,11 +587,8 @@ AddPixel(pclient, pmap, pixel)
 }
 
 int
-IncrementPixel(pclient, pmap, pent, from_server)
-    ClientPtr   pclient;
-    ColormapPtr pmap;
-    Entry      *pent;
-    Bool	from_server;
+IncrementPixel(ClientPtr pclient, ColormapPtr pmap,
+	       Entry *pent, Bool from_server)
 {
 
     if (!AddPixel(pclient, pmap, pent->pixel))
@@ -650,10 +614,7 @@ IncrementPixel(pclient, pmap, pent, from_server)
 }
 
 int
-AllocCell(client, pmap, pixel)
-    ClientPtr   client;
-    ColormapPtr pmap;
-    Pixel pixel;
+AllocCell(ClientPtr client, ColormapPtr pmap, Pixel pixel)
 {
     Entry *pent;
     Pixel p;
@@ -694,14 +655,8 @@ AllocCell(client, pmap, pixel)
 }
 
 int
-StorePixel (client, pmap, red, green, blue, pixel, from_server)
-    ClientPtr   client;
-    ColormapPtr pmap;
-    CARD32      red,
-                green,
-                blue;
-    Pixel       pixel;
-    Bool	from_server;
+StorePixel (ClientPtr client, ColormapPtr pmap, CARD32 red, CARD32 green,
+	    CARD32 blue, Pixel pixel, Bool from_server)
 {
     Entry      *pent;
     Pixel	p;
@@ -762,9 +717,7 @@ StorePixel (client, pmap, red, green, blue, pixel, from_server)
 
 /* ARGSUSED */
 static void
-FreeCell(pent, pixel)
-    Entry      *pent;
-    Pixel       pixel;
+FreeCell(Entry *pent, Pixel pixel)
 {
     pent = &pent[pixel];
     if (pent->status == PIXEL_PRIVATE) {
@@ -779,9 +732,7 @@ FreeCell(pent, pixel)
 }
 
 static void
-FreeServerCell(pent, pixel)
-    Entry      *pent;
-    Pixel       pixel;
+FreeServerCell(Entry *pent, Pixel pixel)
 {
     pent = &pent[pixel];
     if (pent->status == PIXEL_PRIVATE && pent->server_ref)
@@ -795,10 +746,7 @@ FreeServerCell(pent, pixel)
 }
 
 void
-GotServerFreeCellsEvent(pmap, pixel_start, pixel_end)
-    ColormapPtr pmap;
-    Pixel       pixel_start;
-    Pixel	pixel_end;
+GotServerFreeCellsEvent(ColormapPtr pmap, Pixel pixel_start, Pixel pixel_end)
 {
     Pixel pixel;
     
@@ -815,9 +763,7 @@ GotServerFreeCellsEvent(pmap, pixel_start, pixel_end)
 }
 
 void
-FreeAllClientPixels(pmap, client)
-    ColormapPtr pmap;
-    int client;
+FreeAllClientPixels(ColormapPtr pmap, int client)
 {
     Pixel *ppix, *ppst;
     int n;
@@ -846,10 +792,7 @@ FreeAllClientPixels(pmap, client)
 
 /* ARGSUSED */
 int
-FreeClientPixels(client, value, id)
-    ClientPtr	client;
-    pointer	value;
-    XID		id;
+FreeClientPixels(ClientPtr client, pointer value, XID id)
 {
     colorResource *pcr = (colorResource *)value;
     ColormapPtr pmap;
@@ -870,13 +813,8 @@ FreeClientPixels(client, value, id)
 		(bits) += ((bits) & ~(mask))
 
 static void
-FreeCells(client, pmap, num, pixels, mask, channels)
-    ClientPtr   client;
-    ColormapPtr pmap;
-    int         num;
-    Pixel       *pixels;
-    Pixel	mask;
-    int		channels;
+FreeCells(ClientPtr client, ColormapPtr pmap, int num,
+	  Pixel *pixels, Pixel mask, int channels)
 {
     Pixel       pix, base, bits, cmask;
     int         i, zapped, npix, npixnew, offset;
@@ -961,12 +899,8 @@ FreeCells(client, pmap, num, pixels, mask, channels)
 }
 
 int
-FreePixels(client, pmap, num, pixels, mask)
-    ClientPtr   client;
-    ColormapPtr pmap;
-    int         num;
-    Pixel       *pixels;
-    Pixel	mask;
+FreePixels(ClientPtr client, ColormapPtr pmap,
+	   int num, Pixel *pixels, Pixel mask)
 {
 
     if ((pmap->pVisual->class | DynamicClass) != DirectColor)

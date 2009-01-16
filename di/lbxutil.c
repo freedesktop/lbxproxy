@@ -38,6 +38,7 @@
 #include	"wire.h"
 #include	"swap.h"
 #include	"colormap.h"
+#include	"lbxext.h"
 
 Bool compStats = FALSE;		/* report stream compression statistics */
 
@@ -48,11 +49,7 @@ extern int lbxDebug;
 extern int lbxMaxMotionEvents;
 
 ReplyStuffPtr
-NewReply(client, major, minor, reply_func)
-    ClientPtr   client;
-    int		major;
-    int		minor;
-    ReplyFunc	reply_func;
+NewReply(ClientPtr client, int major, int minor, ReplyFunc reply_func)
 {
     ReplyStuffPtr new,
                 *end;
@@ -73,9 +70,7 @@ NewReply(client, major, minor, reply_func)
 }
 
 void
-RemoveReply(client, rp)
-    ClientPtr   client;
-    ReplyStuffPtr rp;
+RemoveReply(ClientPtr client, ReplyStuffPtr rp)
 {
     ReplyStuffPtr cur, *prev;
 
@@ -96,10 +91,7 @@ RemoveReply(client, rp)
 }
 
 ReplyStuffPtr
-GetMatchingReply(client, seqno, flush_older)
-    ClientPtr   client;
-    int         seqno;
-    Bool	flush_older;
+GetMatchingReply(ClientPtr client, int seqno, Bool flush_older)
 {
     ReplyStuffPtr t, old;
 
@@ -127,16 +119,13 @@ GetMatchingReply(client, seqno, flush_older)
 }
 
 Bool
-AnyReplies(client)
-    ClientPtr   client;
+AnyReplies(ClientPtr client)
 {
     return (LBXReplyList(client) != NULL);
 }
 
 Bool
-AnyTagBearingReplies(server, cache)
-    XServerPtr server;
-    Cache cache;
+AnyTagBearingReplies(XServerPtr server, Cache cache)
 {
     int i;
     int lbxreq;
@@ -182,11 +171,7 @@ AnyTagBearingReplies(server, cache)
  */
 
 Bool
-SaveReplyData(client, rep, len, data)
-    ClientPtr   client;
-    xReply     *rep;
-    int		len;
-    pointer     data;
+SaveReplyData(ClientPtr client, xReply *rep, int len, pointer data)
 {
     ReplyDataPtr new, *end;
 
@@ -218,8 +203,7 @@ SaveReplyData(client, rep, len, data)
 }
 
 Bool
-FlushDelayedReplies(client)
-    ClientPtr   client;
+FlushDelayedReplies(ClientPtr client)
 {
     ReplyDataPtr *prev, cur;
 
@@ -248,8 +232,7 @@ FlushDelayedReplies(client)
 }
 
 void
-BumpSequence(client)
-    ClientPtr   client;
+BumpSequence(ClientPtr client)
 {
     DBG(DBG_CLIENT, (stderr, "bumping client %d sequence by %d to %d\n",
 	 client->index, LBXSequenceLost(client), LBXSequenceNumber(client)));
@@ -258,8 +241,7 @@ BumpSequence(client)
 }
 
 void
-ForceSequenceUpdate(client)
-    ClientPtr   client;
+ForceSequenceUpdate(ClientPtr client)
 {
     if (LBXSequenceLost(client)) {
 	BumpSequence(client);
@@ -267,11 +249,7 @@ ForceSequenceUpdate(client)
 }
 
 void
-LbxFreeTag(server, tag, tagtype)
-    XServerPtr	server;
-    XID         tag;
-    int         tagtype;
-
+LbxFreeTag(XServerPtr server, XID tag, int tagtype)
 {
     Cache       tag_cache;
 
@@ -295,10 +273,7 @@ LbxFreeTag(server, tag, tagtype)
 }
 
 void
-LbxSendTagData(client, tag, tagtype)
-    ClientPtr   client;
-    XID         tag;
-    int         tagtype;
+LbxSendTagData(ClientPtr client, XID tag, int tagtype)
 {
     TagData     td;
     unsigned long len;
@@ -329,7 +304,7 @@ extern unsigned long  raw_stream_out;
 extern unsigned long  raw_stream_in;
 
 void
-DumpCompressionStats()
+DumpCompressionStats(void)
 {
     if (raw_stream_out && stream_out_plain) {
 	fprintf(stderr, "Requests:  normal = %ld, reencoded = %ld",
@@ -356,7 +331,7 @@ DumpCompressionStats()
 }
 
 void
-ZeroCompressionStats()
+ZeroCompressionStats(void)
 {
     stream_out_compressed = 0;
     stream_out_uncompressed = 0;
@@ -404,14 +379,8 @@ int         delta_in_total;
 int         delta_in_attempts;
 int         delta_in_hits;
 
-extern int	    gfx_gc_hit;
-extern int	    gfx_gc_miss;
-extern int	    gfx_draw_hit;
-extern int	    gfx_draw_miss;
-extern int	    gfx_total;
-
 void
-DumpOtherStats()
+DumpOtherStats(void)
 {
     fprintf(stderr, "Short-circuit stats\n");
     fprintf(stderr, "InternAtom cache hits %d misses %d\n", intern_good, intern_miss);
@@ -451,7 +420,7 @@ DumpOtherStats()
 }
 
 void
-ZeroOtherStats()
+ZeroOtherStats(void)
 {
     intern_good = intern_miss = 0;
     getatom_good = getatom_miss = 0;
@@ -481,8 +450,7 @@ ZeroOtherStats()
 #endif
 
 void
-SendInitLBXPackets(server)
-    XServerPtr server;
+SendInitLBXPackets(XServerPtr server)
 {
 
     ZeroCompressionStats();
@@ -494,7 +462,7 @@ SendInitLBXPackets(server)
 }
 
 void
-LbxCleanupSession()
+LbxCleanupSession(void)
 {
     if (compStats)
     {

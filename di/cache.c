@@ -96,9 +96,7 @@ typedef struct _cache {
  */
 
 Cache
-CacheInit(server, maxsize)
-    XServerPtr server;
-    unsigned long maxsize;
+CacheInit(XServerPtr server, unsigned long maxsize)
 {
     Cache       id;
     CachePtr    cache;
@@ -126,9 +124,7 @@ CacheInit(server, maxsize)
 }
 
 void
-CacheFreeCache(server, cid)
-    XServerPtr server;
-    Cache       cid;
+CacheFreeCache(XServerPtr server, Cache cid)
 {
     CachePtr cache = server->caches[cid];
     int i;
@@ -150,10 +146,7 @@ CacheFreeCache(server, cid)
 }
 
 static int
-hash(server, cid, id)
-    XServerPtr server;
-    Cache       cid;
-    CacheID     id;
+hash(XServerPtr server, Cache cid, CacheID id)
 {
     CachePtr    cache = server->caches[cid];
 
@@ -185,9 +178,7 @@ hash(server, cid, id)
 }
 
 static void
-rebuild_cache(server, cache)
-    XServerPtr server;
-    CachePtr    cache;
+rebuild_cache(XServerPtr server, CachePtr cache)
 {
     int j;
     CacheEntryPtr cp, next, **tails, *entries, **tptr, *cptr;
@@ -250,9 +241,7 @@ flush_cache(CachePtr cache, unsigned long needed)
 }
 
 Bool
-CacheTrimNeeded(server, cid)
-    XServerPtr server;
-    Cache       cid;
+CacheTrimNeeded(XServerPtr server, Cache cid)
 {
     CachePtr    cache = server->caches[cid];
 
@@ -260,22 +249,14 @@ CacheTrimNeeded(server, cid)
 }
 
 void
-CacheTrim(server, cid)
-    XServerPtr	server;
-    Cache       cid;
+CacheTrim(XServerPtr server, Cache cid)
 {
     flush_cache(server->caches[cid], 0);
 }
 
 Bool
-CacheStoreMemory(server, cid, id, data, size, free_func, can_flush)
-    XServerPtr server;
-    Cache       cid;
-    CacheID     id;
-    pointer     data;
-    unsigned long size;
-    CacheFree   free_func;
-    Bool	can_flush;
+CacheStoreMemory(XServerPtr server, Cache cid, CacheID id, pointer data,
+		 unsigned long size, CacheFree free_func, Bool can_flush)
 {
     CacheEntryPtr cp, *head;
     CachePtr    cache = server->caches[cid];
@@ -305,11 +286,7 @@ CacheStoreMemory(server, cid, id, data, size, free_func, can_flush)
 }
 
 pointer
-CacheFetchMemory(server, cid, id, update)
-    XServerPtr server;
-    Cache       cid;
-    CacheID     id;
-    Bool        update;
+CacheFetchMemory(XServerPtr server, Cache cid, CacheID id, Bool update)
 {
     CachePtr    cache = server->caches[cid];
     CacheEntryPtr cp,
@@ -327,11 +304,7 @@ CacheFetchMemory(server, cid, id, update)
 }
 
 void
-CacheFreeMemory(server, cacheid, cid, notify)
-    XServerPtr server;
-    Cache       cacheid;
-    CacheID     cid;
-    Bool        notify;
+CacheFreeMemory(XServerPtr server, Cache cacheid, CacheID cid, Bool notify)
 {
     CachePtr    cache = server->caches[cacheid];
     CacheEntryPtr cp, *prev;

@@ -115,5 +115,9 @@ extern Bool AnyTagBearingReplies(
 
 extern Cache global_cache;
 extern Cache prop_cache;
+extern int lbxTagCacheSize;
+extern Bool lbxUseTags;
+extern Bool lbxDoSquishing;
+extern Bool compStats;
 
 #endif				/* _TAGS_H_ */

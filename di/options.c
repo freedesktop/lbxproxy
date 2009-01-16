@@ -62,28 +62,48 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/extensions/lbxzlib.h>
 #endif /* NO_ZLIB */
 #include "wire.h"
+#include "tags.h"
 
-static int LbxDeltaReply();
-static int LbxProxyDeltaReq();
-static int LbxServerDeltaReq();
-static int LbxStreamCompReq();
-static int LbxBitmapCompReq();
-static int LbxPixmapCompReq();
-static int LbxSquishReq();
-static int LbxUseTagsReq();
-static int LbxCmapAllReq();
+static int
+LbxDeltaReply(void *preply, int replylen, short *pn, short *pmaxlen);
+static int
+LbxProxyDeltaReq(XServerPtr server, void *buf);
+static int
+LbxServerDeltaReq(XServerPtr server, void *buf);
+static int
+LbxStreamCompReq(XServerPtr server, void *buf);
+static int
+LbxBitmapCompReq(XServerPtr server, void *buf);
+static int
+LbxPixmapCompReq(XServerPtr server, void *buf);
+static int
+LbxSquishReq(XServerPtr server, void *buf);
+static int
+LbxUseTagsReq(XServerPtr server, void *buf);
+static int
+LbxCmapAllReq(XServerPtr server, void *buf);
 
-static int LbxProxyDeltaReply();
-static int LbxServerDeltaReply();
-static int LbxStreamCompReply();
-static int LbxBitmapCompReply();
-static int LbxPixmapCompReply();
-static int LbxSquishReply();
-static int LbxUseTagsReply();
-static int LbxCmapAllReply();
+static int
+LbxProxyDeltaReply(XServerPtr server, void *preply, int replylen);
+static int
+LbxServerDeltaReply(XServerPtr server, void *preply, int replylen);
+static int
+LbxStreamCompReply(XServerPtr server, void *preply, int replylen);
+static int
+LbxBitmapCompReply(XServerPtr server, void *preply, int replylen);
+static int
+LbxPixmapCompReply(XServerPtr server, void *preply, int replylen);
+static int
+LbxSquishReply(XServerPtr server, void *preply, int replylen);
+static int
+LbxUseTagsReply(XServerPtr server, void *preply, int replylen);
+static int
+LbxCmapAllReply(XServerPtr server, void *preply, int replylen);
 
-static int OptZlibReq();
-static int OptZlibReply();
+static int
+OptZlibReq(XServerPtr server, void *buf);
+static int
+OptZlibReply(XServerPtr server, void *preply, int replylen);
 
 #define OPT_INDEX_STREAM_COMP		2
 
@@ -96,13 +116,9 @@ static Bool called_LbxNoDelta;
 
 
 static void
-InitializeOptionsList (server, idx, optcode, negotiate, req, reply)
-    XServerPtr 	server;
-    int		idx;
-    CARD8	optcode;
-    Bool	negotiate;
-    int		(*req)();
-    int		(*reply)();
+InitializeOptionsList(XServerPtr server, int idx, CARD8 optcode, Bool negotiate,
+		      int (*req)(XServerPtr, void *),
+		      int (*reply)(XServerPtr, void *, int))
 {
     server->LbxOptions[idx].optcode   = optcode;
     server->LbxOptions[idx].negotiate = negotiate;
@@ -111,8 +127,7 @@ InitializeOptionsList (server, idx, optcode, negotiate, req, reply)
 }
 
 static void
-InitializeDeltaOptions (server)
-    XServerPtr server;
+InitializeDeltaOptions(XServerPtr server)
 {
     server->proxyDeltaOpt.minN		= 0;
     server->proxyDeltaOpt.maxN		= 0xff;
@@ -130,8 +145,7 @@ InitializeDeltaOptions (server)
 }
     
 static void
-InitializeStreamComp (server)
-    XServerPtr server;
+InitializeStreamComp(XServerPtr server)
 {
     server->LbxStreamComp[0].typelen = ZLIB_STRCOMP_OPT_LEN;
     server->LbxStreamComp[0].type    = ZLIB_STRCOMP_OPT;
@@ -140,8 +154,7 @@ InitializeStreamComp (server)
 }
 
 static void
-InitializeBitmapCompMethod (server)
-    XServerPtr server;
+InitializeBitmapCompMethod(XServerPtr server)
 {
     /* compression method name */
     server->LbxBitmapCompMethods[0].methodName	= "XC-FaxG42D";	
@@ -164,8 +177,7 @@ InitializeBitmapCompMethod (server)
 
 /*ARGSUSED*/
 static void
-InitializePixmapCompMethod (server)
-    XServerPtr server;
+InitializePixmapCompMethod(XServerPtr server)
 {
     /*
      * Currently, we don't support any pixmap compression algorithms
@@ -179,8 +191,7 @@ InitializePixmapCompMethod (server)
 }
 
 static void
-InitializeCmpaAllMethods (server)
-    XServerPtr server;
+InitializeCmpaAllMethods(XServerPtr server)
 {
     /* colormap allocation method name */
     server->LbxCmapAllMethods[0].methodName = "XC-CMAP";
@@ -196,8 +207,7 @@ InitializeCmpaAllMethods (server)
 }
 
 void
-LbxOptInit(server)
-    XServerPtr server;
+LbxOptInit(XServerPtr server)
 {
     bzero((char *)&server->lbxNegOpt, sizeof(LbxNegOptsRec));
 
@@ -255,10 +265,9 @@ LbxOptInit(server)
 }
 
 int
-LbxOptBuildReq(server, buf)
-    XServerPtr server;
-    register char *buf;
+LbxOptBuildReq(XServerPtr server, void *_buf)
 {
+    char *buf = _buf;
     int		  i;
     char *bufstart = buf;
     char *pnopts = buf++;
@@ -284,12 +293,9 @@ LbxOptBuildReq(server, buf)
 }
 
 int
-LbxOptParseReply(server, nopts, preply, replylen)
-    XServerPtr server;
-    int		  nopts;
-    unsigned char *preply;
-    int		  replylen;
+LbxOptParseReply(XServerPtr server, int nopts, void *_preply, int replylen)
 {
+    unsigned char *preply = _preply;
     int		  i;
 
     for (i = 0; i < nopts; i++) {
@@ -321,7 +327,7 @@ LbxOptParseReply(server, nopts, preply, replylen)
 }
 
 void
-LbxNoDelta()
+LbxNoDelta(void)
 {
     /* 
      * All we can do now is to flag that this was called
@@ -332,28 +338,21 @@ LbxNoDelta()
 }
 
 static int
-LbxProxyDeltaReq(server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxProxyDeltaReq(XServerPtr server, void *buf)
 {
     memcpy(buf, (char *)&server->proxyDeltaOpt, sizeof(LbxDeltaOptionsRec));
     return LBX_OPT_DELTA_REQLEN;
 }
 
 static int
-LbxServerDeltaReq(server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxServerDeltaReq(XServerPtr server, void *buf)
 {
     memcpy(buf, (char *)&server->serverDeltaOpt, sizeof(LbxDeltaOptionsRec));
     return LBX_OPT_DELTA_REQLEN;
 }
 
 static int
-LbxProxyDeltaReply(server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int		  replylen;
+LbxProxyDeltaReply(XServerPtr server, void *preply, int replylen)
 {
     return LbxDeltaReply(preply, 
 			 replylen,
@@ -362,10 +361,7 @@ LbxProxyDeltaReply(server, preply, replylen)
 }
 
 static int
-LbxServerDeltaReply(server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int		  replylen;
+LbxServerDeltaReply(XServerPtr server, void *preply, int replylen)
 {
     return LbxDeltaReply(preply, 
 			 replylen,
@@ -374,12 +370,9 @@ LbxServerDeltaReply(server, preply, replylen)
 }
 
 static int
-LbxDeltaReply(preply, replylen, pn, pmaxlen)
-    unsigned char *preply;
-    int		  replylen;
-    short	  *pn;
-    short	  *pmaxlen;
+LbxDeltaReply(void *_preply, int replylen, short *pn, short *pmaxlen)
 {
+    unsigned char *preply = _preply;
     if (replylen < 2)
 	return -1;
     *pn = *preply++;
@@ -397,7 +390,7 @@ LbxDeltaReply(preply, replylen, pn, pmaxlen)
 
 
 void
-LbxNoComp()
+LbxNoComp(void)
 {
     /* 
      * All we can do now is to flag that this was called
@@ -408,10 +401,9 @@ LbxNoComp()
 }
 
 static int
-LbxStreamCompReq(server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxStreamCompReq(XServerPtr server, void *_buf)
 {
+    unsigned char *buf = _buf;
     int		  i;
     int		  reqlen;
     int		  LBX_N_STRCOMP;
@@ -441,11 +433,9 @@ LbxStreamCompReq(server, buf)
 }
 
 static int
-LbxStreamCompReply(server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int		  replylen;
+LbxStreamCompReply(XServerPtr server, void *_preply, int replylen)
 {
+    unsigned char *preply = _preply;
     int		  optindex;
     int		  LBX_N_STRCOMP;
     
@@ -464,10 +454,9 @@ extern int  zlevel;
 
 /*ARGSUSED*/
 static int
-OptZlibReq(server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+OptZlibReq(XServerPtr server, void *_buf)
 {
+    unsigned char *buf = _buf;
     *buf++ = 1; /* len */
     *buf = zlevel;
     return (2);
@@ -475,10 +464,7 @@ OptZlibReq(server, buf)
 
 /*ARGSUSED*/
 static int
-OptZlibReply(server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int		  replylen;
+OptZlibReply(XServerPtr server, void *preply, int replylen)
 {
     server->lbxNegOpt.streamOpts.streamCompInit =
 	(LbxStreamCompHandle (*)(int, pointer))ZlibInit;
@@ -500,20 +486,17 @@ Bool lbxDoSquishing = TRUE;
 
 /*ARGSUSED*/
 static int
-LbxSquishReq(server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxSquishReq(XServerPtr server, void *_buf)
 {
+    unsigned char *buf = _buf;
     *buf = lbxDoSquishing;
     return 1;
 }
 
 static int
-LbxSquishReply(server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int		  replylen;
+LbxSquishReply(XServerPtr server, void *_preply, int replylen)
 {
+    unsigned char *preply = _preply;
     if (replylen < 1)
 	return -1;
     server->lbxNegOpt.squish = *preply;
@@ -525,21 +508,18 @@ Bool lbxUseTags = TRUE;
 
 /*ARGSUSED*/
 static int
-LbxUseTagsReq(server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxUseTagsReq(XServerPtr server, void *_buf)
 {
+    unsigned char *buf = _buf;
     *buf = lbxUseTags;
     return 1;
 }
 
 
 static int
-LbxUseTagsReply(server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int		  replylen;
+LbxUseTagsReply(XServerPtr server, void *_preply, int replylen)
 {
+    unsigned char *preply = _preply;
     if (replylen < 1)
 	return -1;
     server->lbxNegOpt.useTags = *preply;
@@ -552,10 +532,9 @@ LbxUseTagsReply(server, preply, replylen)
  */
 
 static int
-LbxBitmapCompReq (server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxBitmapCompReq(XServerPtr server, void *_buf)
 {
+    unsigned char *buf = _buf;
     unsigned char *bufStart = buf;
     int i;
     int NUM_BITMAP_METHODS;
@@ -578,11 +557,9 @@ LbxBitmapCompReq (server, buf)
 
 /*ARGSUSED*/
 static int
-LbxBitmapCompReply (server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int	      replylen;
+LbxBitmapCompReply(XServerPtr server, void *_preply, int replylen)
 {
+    unsigned char *preply = _preply;
     int count = *preply++;
     int i;
 
@@ -610,10 +587,9 @@ LbxBitmapCompReply (server, preply, replylen)
 
 
 static int
-LbxPixmapCompReq (server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxPixmapCompReq(XServerPtr server, void *_buf)
 {
+    unsigned char *buf = _buf;
     unsigned char *bufStart = buf;
     int i, j;
 
@@ -636,11 +612,9 @@ LbxPixmapCompReq (server, buf)
 
 /*ARGSUSED*/
 static int
-LbxPixmapCompReply (server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int	      replylen;
+LbxPixmapCompReply(XServerPtr server, void *_preply, int replylen)
 {
+    unsigned char *preply = _preply;
     int count = *preply++;
     int i, j;
 
@@ -672,9 +646,7 @@ LbxPixmapCompReply (server, preply, replylen)
 
 
 LbxBitmapCompMethod *
-LbxLookupBitmapCompMethod (server, methodOpCode)
-    XServerPtr server;
-    int methodOpCode;
+LbxLookupBitmapCompMethod(XServerPtr server, int methodOpCode)
 
 {
     int i;
@@ -694,9 +666,7 @@ LbxLookupBitmapCompMethod (server, methodOpCode)
 
 
 LbxPixmapCompMethod *
-LbxLookupPixmapCompMethod (server, methodOpCode)
-    XServerPtr server;
-    int methodOpCode;
+LbxLookupPixmapCompMethod(XServerPtr server, int methodOpCode)
 
 {
     int i;
@@ -716,8 +686,7 @@ LbxLookupPixmapCompMethod (server, methodOpCode)
 
 
 LbxBitmapCompMethod *
-LbxFindPreferredBitmapCompMethod (server)
-    XServerPtr server;
+LbxFindPreferredBitmapCompMethod(XServerPtr server)
 
 {
     if (server->lbxNegOpt.numBitmapCompMethods == 0)
@@ -728,10 +697,7 @@ LbxFindPreferredBitmapCompMethod (server)
 
 
 LbxPixmapCompMethod *
-LbxFindPreferredPixmapCompMethod (server, format, depth)
-    XServerPtr server;
-    int format;
-    int depth;
+LbxFindPreferredPixmapCompMethod(XServerPtr server, int format, int depth)
 
 {
     if (server->lbxNegOpt.numPixmapCompMethods == 0)
@@ -761,10 +727,9 @@ LbxFindPreferredPixmapCompMethod (server, format, depth)
  * Colormap methods
  */
 static int
-LbxCmapAllReq (server, buf)
-    XServerPtr server;
-    unsigned char *buf;
+LbxCmapAllReq(XServerPtr server, void *_buf)
 {
+    unsigned char *buf = _buf;
     unsigned char *bufStart = buf;
     int i;
     int NUM_CMAP_METHODS;
@@ -786,11 +751,9 @@ LbxCmapAllReq (server, buf)
 }
 
 static int
-LbxCmapAllReply(server, preply, replylen)
-    XServerPtr server;
-    unsigned char *preply;
-    int		  replylen;
+LbxCmapAllReply(XServerPtr server, void *_preply, int replylen)
 {
+    unsigned char *preply = _preply;
     int NUM_CMAP_METHODS;
 
     NUM_CMAP_METHODS = sizeof (server->LbxCmapAllMethods) /

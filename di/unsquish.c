@@ -57,6 +57,7 @@ in this Software without prior written authorization from The Open Group.
 #define	_XLBX_SERVER_
 #include <X11/extensions/lbxstr.h>
 #include "proxyopts.h"
+#include "lbx.h"
 
 #include	<stdio.h>
 
@@ -99,9 +100,7 @@ static char lbxevsize[] = {
 };
 
 int
-EventLength(ev, squish)
-    xEvent     *ev;
-    Bool       squish;
+EventLength(xEvent *ev, Bool squish)
 {
     if (!squish || ev->u.u.type >= LASTEvent)
 	return sz_xEvent;
@@ -109,10 +108,7 @@ EventLength(ev, squish)
 }
 
 Bool
-UnsquishEvent(rep, ev, lenp)
-    xReply     *rep;
-    xEvent     *ev;
-    int        *lenp;
+UnsquishEvent(xReply *rep, xEvent *ev, int *lenp)
 {
     if (*lenp < sz_xEvent) {
 	memcpy((char *)ev, (char *)rep, *lenp);

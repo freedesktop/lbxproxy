@@ -73,12 +73,10 @@ char 		*display;
 
 int		lbxMaxServers = DEFAULT_MAXSERVERS;
 
-static void InitializeGlobals ();
+static void InitializeGlobals(void);
 
 int
-main (argc, argv)
-    int	    argc;
-    char    **argv;
+main(int argc, char **argv)
 {
     display = "63";
 
@@ -141,7 +139,7 @@ main (argc, argv)
  * to a display server.
  */
 static void
-InitializeGlobals ()
+InitializeGlobals(void)
 {
     int		i;
     ClientPtr	tmp;
@@ -180,7 +178,6 @@ InitializeGlobals ()
 
 /* ARGSUSED */
 void
-MarkClientException (client)
-    ClientPtr	client;
+MarkClientException(ClientPtr client)
 {
 }

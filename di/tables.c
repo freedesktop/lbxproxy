@@ -21,55 +21,21 @@
  *
  */
 
-extern int  ProcInitialConnection(), ProcEstablishConnection();
+#undef _XSERVER64
+#include "wire.h"
+#include "util.h"
+#include <X11/Xlibint.h>
+#include <X11/Xutil.h>
+#include "lbx.h"
 
-extern int  ProcStandardRequest();
-
-extern int  ProcLBXChangeWindowAttributes(),
-	    ProcLBXGetWindowAttributes(),
-	    ProcLBXGetGeometry(),
-	    ProcLBXInternAtom(),
-            ProcLBXGetAtomName(),
-            ProcLBXCreateColormap(),
-            ProcLBXFreeColormap(),
-            ProcLBXCopyColormapAndFree(),
-            ProcLBXFreeColors(),
-            ProcLBXLookupColor(),
-            ProcLBXAllocColor(),
-            ProcLBXAllocNamedColor(),
-            ProcLBXAllocColorCells(),
-            ProcLBXAllocColorPlanes(),
-            ProcLBXGetModifierMapping(),
-            ProcLBXGetKeyboardMapping(),
-            ProcLBXQueryFont(),
-            ProcLBXChangeProperty(),
-            ProcLBXGetProperty(),
-	    ProcLBXCopyArea(),
-	    ProcLBXCopyPlane(),
-            ProcLBXPolyPoint(),
-            ProcLBXPolyLine(),
-            ProcLBXPolySegment(),
-            ProcLBXPolyRectangle(),
-            ProcLBXPolyArc(),
-            ProcLBXFillPoly(),
-            ProcLBXPolyFillRectangle(),
-            ProcLBXPolyFillArc(),
-	    ProcLBXPolyText(),
-	    ProcLBXImageText(),
-            ProcLBXQueryExtension(),
-	    ProcLBXGetImage(),
-	    ProcLBXPutImage();
-
-extern int  ProcBadRequest();
-
-int         (*InitialVector[3]) () =
+int (*InitialVector[3])(ClientPtr) =
 {
     0,
     ProcInitialConnection,
     ProcEstablishConnection
 };
 
-int         (*ProcVector[256]) () =
+int (*ProcVector[256])(ClientPtr client) =
 {
     ProcBadRequest,
     ProcStandardRequest,
@@ -329,11 +295,7 @@ int         (*ProcVector[256]) () =
     ProcStandardRequest,
 };
 
-
-extern int  ServerProcError(), ServerProcReply(),
-            ServerProcStandardEvent();
-
-int         (*ServerVector[256]) () = {
+int (*ServerVector[256]) (ClientPtr) = {
     ServerProcStandardEvent,
     ServerProcStandardEvent,
     ServerProcStandardEvent,

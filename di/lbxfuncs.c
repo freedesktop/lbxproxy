@@ -56,13 +56,20 @@
 extern int lbxDebug;
 #endif
 
-static Bool intern_atom_reply();
-static Bool get_atom_name_reply();
-static Bool get_mod_map_reply();
-static Bool get_key_map_reply();
-static Bool sync_reply();
-static Bool get_queryfont_reply();
-static Bool GetWinAttrAndGeomReply();
+static Bool
+intern_atom_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+get_atom_name_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+get_mod_map_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+get_key_map_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+sync_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+get_queryfont_reply(ClientPtr client, ReplyStuffPtr nr, char *data);
+static Bool
+GetWinAttrAndGeomReply (ClientPtr client, ReplyStuffPtr nr, char *data);
 
 #define reply_length(cp,rep) ((rep)->type==X_Reply ? \
         32 + (HostUnswapLong((cp),(rep)->length) << 2) \
@@ -72,13 +79,8 @@ char protocolMode = PROTOCOL_FULL;
 
 /* ARGSUSED */
 static void 
-get_connection_info(client, cs, cs_len, change_type, changes, changes_len)
-    ClientPtr   client;
-    xConnSetup *cs;
-    int		cs_len;
-    int		change_type;
-    CARD32     *changes;
-    int		changes_len;
+get_connection_info(ClientPtr client,  xConnSetup *cs, int cs_len,
+		    int change_type, CARD32 *changes, int changes_len)
 {
     xWindowRoot *root;
     xDepth     *depth;
@@ -162,15 +164,9 @@ send_setup_reply(ClientPtr client, Bool success, int majorVer, int minorVer,
 }
 
 static void
-finish_setup_reply(client, cs, cs_len, change_type, changes, changes_len, majorVer, minorVer)
-    ClientPtr   client;
-    xConnSetup *cs;
-    int         cs_len;
-    int		change_type;
-    CARD32*     changes;
-    int		changes_len;
-    int		majorVer,
-                minorVer;
+finish_setup_reply(ClientPtr client, xConnSetup *cs, int cs_len,
+		   int change_type, CARD32* changes, int changes_len,
+		   int majorVer, int minorVer)
 {
     get_connection_info(client, cs, cs_len, change_type, changes, changes_len);
     client->minKeyCode = cs->minKeyCode;
@@ -192,10 +188,7 @@ finish_setup_reply(client, cs, cs_len, change_type, changes, changes_len, majorV
  */
 
 static void
-get_setup_reply(client, data, len)
-    ClientPtr   client;
-    char       *data;
-    int		len;
+get_setup_reply(ClientPtr client, char *data, int len)
 {
     register xLbxConnSetupPrefix *rep;
     TagData     td;
@@ -270,8 +263,7 @@ get_setup_reply(client, data, len)
 }
 
 int
-ProcLBXInternAtom(client)
-    ClientPtr   client;
+ProcLBXInternAtom(ClientPtr client)
 {
     REQUEST(xInternAtomReq);
     char       *s;
@@ -333,10 +325,7 @@ ProcLBXInternAtom(client)
 }
 
 static Bool
-intern_atom_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+intern_atom_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     Atom        atom;
     char       *str;
@@ -360,8 +349,7 @@ intern_atom_reply(client, nr, data)
 }
 
 int
-ProcLBXGetAtomName(client)
-    ClientPtr   client;
+ProcLBXGetAtomName(ClientPtr client)
 {
     REQUEST(xResourceReq);
     char       *str;
@@ -416,10 +404,7 @@ ProcLBXGetAtomName(client)
 }
 
 static Bool
-get_atom_name_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+get_atom_name_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     Atom        atom;
     char       *s;
@@ -453,8 +438,7 @@ get_atom_name_reply(client, nr, data)
  */
 
 void
-SendLbxSync (client)
-    ClientPtr client;
+SendLbxSync(ClientPtr client)
 {
     xLbxSyncReq req;
     ReplyStuffPtr nr;
@@ -475,22 +459,15 @@ SendLbxSync (client)
 
 /* ARGSUSED */
 static Bool
-sync_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+sync_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     /* do nothing; just here to catch and discard the reply */
     return TRUE;
 }
 
 void
-WriteError(client, majorCode, minorCode, resId, errorCode)
-    ClientPtr client;
-    unsigned int majorCode;
-    unsigned int minorCode;
-    XID resId;
-    int errorCode;
+WriteError(ClientPtr client, unsigned int majorCode, unsigned int minorCode,
+	   XID resId, int errorCode)
 {
     xError      rep;
     int		n;
@@ -512,8 +489,7 @@ WriteError(client, majorCode, minorCode, resId, errorCode)
 }
 
 int
-ProcLBXGetModifierMapping(client)
-    ClientPtr   client;
+ProcLBXGetModifierMapping(ClientPtr client)
 {
     ReplyStuffPtr nr;
 
@@ -529,10 +505,7 @@ ProcLBXGetModifierMapping(client)
 
 /*ARGSUSED*/
 static Bool
-get_mod_map_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+get_mod_map_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xLbxGetModifierMappingReply *rep;
     int         len;
@@ -599,8 +572,7 @@ get_mod_map_reply(client, nr, data)
 }
 
 int
-ProcLBXGetKeyboardMapping(client)
-    ClientPtr   client;
+ProcLBXGetKeyboardMapping(ClientPtr client)
 {
     REQUEST(xGetKeyboardMappingReq);
     ReplyStuffPtr nr;
@@ -624,10 +596,7 @@ ProcLBXGetKeyboardMapping(client)
  */
 
 static Bool
-get_key_map_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+get_key_map_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xLbxGetKeyboardMappingReply *rep;
     int         len;
@@ -722,8 +691,7 @@ get_key_map_reply(client, nr, data)
 }
 
 int
-ProcLBXQueryFont(client)
-    ClientPtr   client;
+ProcLBXQueryFont(ClientPtr client)
 {
     REQUEST(xResourceReq);
     ReplyStuffPtr nr;
@@ -745,11 +713,7 @@ ProcLBXQueryFont(client)
 }
 
 static INT16
-unpack_val(val, mask, sft, bts)
-    CARD32      val;
-    CARD32      mask;
-    int         sft,
-                bts;
+unpack_val(CARD32 val, CARD32 mask, int sft, int bts)
 {
     CARD16      utmp;
     INT16       sval;
@@ -841,10 +805,7 @@ UnsquishFontInfo(int compression, xLbxFontInfo *fdata, int dlen, pointer *qfr)
 
 /*ARGSUSED*/
 static Bool
-get_queryfont_reply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+get_queryfont_reply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xLbxQueryFontReply *rep;
     int         len,
@@ -939,8 +900,7 @@ get_queryfont_reply(client, nr, data)
 
 
 int
-ProcLBXGetWindowAttributes(client)
-    ClientPtr   client;
+ProcLBXGetWindowAttributes(ClientPtr client)
 {
     REQUEST(xResourceReq);
     xLbxGetWinAttrAndGeomReq newreq;
@@ -984,10 +944,7 @@ ProcLBXGetWindowAttributes(client)
 
 
 static Bool
-GetWinAttrAndGeomReply (client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+GetWinAttrAndGeomReply (ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xLbxGetWinAttrAndGeomReply *lbxrep;
     xGetWindowAttributesReply reply;
@@ -1082,8 +1039,7 @@ GetWinAttrAndGeomReply (client, nr, data)
 
 
 int
-ProcLBXGetGeometry(client)
-    ClientPtr   client;
+ProcLBXGetGeometry(ClientPtr client)
 {
     /* REQUEST(xResourceReq); */
     xGetGeometryReply reply;
@@ -1151,8 +1107,7 @@ ProcLBXGetGeometry(client)
 
 /* We're just looking for signs of the window manager here */
 int
-ProcLBXChangeWindowAttributes(client)
-    ClientPtr client;
+ProcLBXChangeWindowAttributes(ClientPtr client)
 {
     REQUEST(xChangeWindowAttributesReq);
     Window win;
@@ -1177,9 +1132,7 @@ ProcLBXChangeWindowAttributes(client)
 }
 
 void
-FinishLBXRequest(client, yank)
-    ClientPtr   client;
-    int         yank;
+FinishLBXRequest(ClientPtr client, int yank)
 {
     REQUEST(xReq);
     char        n;
@@ -1249,10 +1202,7 @@ FinishLBXRequest(client, yank)
  * QueryFont regularly hits this in normal operation
  */
 static int
-patchup_error(client, err, nr)
-    ClientPtr   client;
-    xError     *err;
-    ReplyStuffPtr nr;
+patchup_error(ClientPtr client, xError *err, ReplyStuffPtr nr)
 {
     int         retval = 1;
     CARD16      minor_code;
@@ -1303,10 +1253,7 @@ patchup_error(client, err, nr)
 }
 
 static Bool
-error_matches(client, nr, err)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    xError     *err;
+error_matches(ClientPtr client, ReplyStuffPtr nr, xError *err)
 {
     CARD16      mc;
     char        n;
@@ -1323,10 +1270,7 @@ error_matches(client, nr, err)
  * FALSE if data is replaced
  */
 static Bool
-HandleReply(client, data, len)
-    ClientPtr   client;
-    char       *data;
-    int         len;
+HandleReply(ClientPtr client, char *data, int len)
 {
     xGenericReply *reply;
     xError     *err;
@@ -1419,10 +1363,7 @@ HandleReply(client, data, len)
 }
 
 void
-DoLBXReply(client, data, len)
-    ClientPtr   client;
-    char       *data;
-    int         len;
+DoLBXReply(ClientPtr client, char *data, int len)
 {
     if (HandleReply(client, data, len))
 	WriteToClient (client, len, data);

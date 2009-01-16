@@ -26,8 +26,10 @@
 #include <config.h>
 #endif
 
-#define LBXPROXY_t
-#define TRANS_CLIENT
-#define TRANS_SERVER
+#ifndef LBXPROXY_t
+#  define LBXPROXY_t
+#  define TRANS_CLIENT
+#  define TRANS_SERVER
+#endif
 
 #include <X11/Xtrans/transport.c>

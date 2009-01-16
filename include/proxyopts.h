@@ -80,13 +80,13 @@ extern void LbxOptInit(
 
 extern int LbxOptBuildReq(
     XServerPtr /*server*/,
-    char * /*buf*/
+    void * /*buf*/
 );
 
 extern int LbxOptParseReply(
     XServerPtr /*server*/,
     int /*nopts*/,
-    unsigned char * /*preply*/,
+    void * /*preply*/,
     int /*replylen*/
 );
 

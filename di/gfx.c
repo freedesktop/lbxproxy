@@ -62,8 +62,10 @@ in this Software without prior written authorization from The Open Group.
 #include        <X11/extensions/lbximage.h>
 #include	"proxyopts.h"
 #include	"swap.h"
+#include	"lbxext.h"
 
-static Bool GetLbxImageReply();
+static Bool
+GetLbxImageReply(ClientPtr client, ReplyStuffPtr nr, char *data);
 
 static int  pad[4] = {0, 3, 2, 1};
 
@@ -71,11 +73,11 @@ static int  pad[4] = {0, 3, 2, 1};
  * Routines for re-encoding line, rectangle and arc requests
  */
 
-#define REENCODE_PSHORT(val, out) \
+#define REENCODE_PSHORT(val, out, zero) \
     if ((val) >= 0 && (val) < 0xf0) \
 	*(out)++ = (val); \
     else if ((val) >= 0xef0 || (val) < (short)0xfe00) \
-	return 0; \
+	return zero; \
     else if ((val) < 0) { \
 	*(out)++ = 0xf0 | (((val) + 0x1000) >> 8); \
 	*(out)++ = (val) + 0x1000; \
@@ -98,11 +100,11 @@ static int  pad[4] = {0, 3, 2, 1};
 	*(out)++ = (val) - 0x80; \
     }
 
-#define REENCODE_USHORT(val, out) \
+#define REENCODE_USHORT(val, out, zero) \
     if ((val) < 0xf0) \
 	*(out)++ = (val); \
     else if ((unsigned short)(val) >= 0x10f0) \
-	return 0; \
+	return zero; \
     else { \
 	*(out)++ = 0xf0 | (((val) - 0xf0) >> 8); \
 	*(out)++ = (val) - 0xf0; \
@@ -133,12 +135,12 @@ static int  pad[4] = {0, 3, 2, 1};
 	    swaps(&(oval), n); \
     }
 
-#define SWAP_REENCODE_PSHORT(ival, out) { \
+#define SWAP_REENCODE_PSHORT(ival, out, zero) { \
     register int    _n; \
     short	    _val; \
     _val = (ival); \
     if (client->swapped) swaps (&_val, _n); \
-    REENCODE_PSHORT(_val, out); \
+    REENCODE_PSHORT(_val, out, zero); \
 }
 
 #define SWAP_REENCODE_SHORT(ival, out) { \
@@ -149,12 +151,12 @@ static int  pad[4] = {0, 3, 2, 1};
     REENCODE_SHORT(_val, out); \
 }
 
-#define SWAP_REENCODE_USHORT(ival, out) { \
+#define SWAP_REENCODE_USHORT(ival, out, zero) { \
     register int    _n; \
     unsigned short  _val; \
     _val = (ival); \
     if (client->swapped) swaps (&_val, _n); \
-    REENCODE_USHORT(_val, out); \
+    REENCODE_USHORT(_val, out, zero); \
 }
 
 int gfx_gc_hit;
@@ -164,18 +166,14 @@ int gfx_draw_miss;
 int gfx_total;
 
 static void
-push(cache, xid)
-    XID         cache[GFX_CACHE_SIZE];
-    XID         xid;
+push(XID cache[GFX_CACHE_SIZE], XID xid)
 {
     memmove(cache + 1, cache, (GFX_CACHE_SIZE - 1) * sizeof(cache[0]));
     cache[0] = xid;
 }
 
 static void
-use(cache, i)
-    XID         cache[GFX_CACHE_SIZE];
-    int         i;
+use(XID cache[GFX_CACHE_SIZE], int i)
 {
     XID         tmp;
 
@@ -187,9 +185,7 @@ use(cache, i)
 }
 
 static int
-match(cache, xid)
-    XID         cache[GFX_CACHE_SIZE];
-    XID         xid;
+match(XID cache[GFX_CACHE_SIZE], XID xid)
 {
     int         j;
 
@@ -313,10 +309,8 @@ match(cache, xid)
 }
 
 static int
-reencode_poly(client, lbxreq, reencode_rtn)
-    ClientPtr   client;
-    CARD8       lbxreq;
-    int         (*reencode_rtn) ();
+reencode_poly(ClientPtr client, CARD8 lbxreq,
+	      int (*reencode_rtn)(ClientPtr, short *, char *out, int))
 {
     REQUEST(xPolyPointReq);
     XServerPtr  server = client->server;
@@ -361,11 +355,8 @@ bail:
 
 /* ARGSUSED */
 static int
-reencode_points_origin(client, in, out, count)
-    ClientPtr   client;
-    register short *in;
-    register char *out;
-    int         count;
+reencode_points_origin(ClientPtr client, register short *in,
+		       register char *out, int count)
 {
     register short diff;
     int         i;
@@ -389,11 +380,8 @@ reencode_points_origin(client, in, out, count)
 
 /* ARGSUSED */
 static int
-reencode_points_previous(client, in, out, count)
-    ClientPtr   client;
-    register short *in;
-    register char *out;
-    int         count;
+reencode_points_previous(ClientPtr client, register short *in,
+			 register char *out, int count)
 {
     int         i;
     short       inval;
@@ -410,11 +398,8 @@ reencode_points_previous(client, in, out, count)
 
 /* ARGSUSED */
 static int
-reencode_segment(client, in, out, count)
-    ClientPtr   client;
-    register short *in;
-    register char *out;
-    int         count;
+reencode_segment(ClientPtr client, register short *in,
+		 register char *out, int count)
 {
     register short diff;
     int         i;
@@ -448,11 +433,8 @@ reencode_segment(client, in, out, count)
 
 /* ARGSUSED */
 static int
-reencode_rectangle(client, in, out, count)
-    ClientPtr   client;
-    register short *in;
-    register char *out;
-    int         count;
+reencode_rectangle(ClientPtr client, register short *in,
+		   register char *out, int count)
 {
     register short diff;
     int         i;
@@ -475,20 +457,17 @@ reencode_rectangle(client, in, out, count)
 
 	/* reencode (width, height) */
 	COPY_AND_SWAPS(inval, in[2]);
-	REENCODE_USHORT(inval, out);
+	REENCODE_USHORT(inval, out, 0);
 	COPY_AND_SWAPS(inval, in[3]);
-	REENCODE_USHORT(inval, out);
+	REENCODE_USHORT(inval, out, 0);
     }
     return out - start_out;
 }
 
 /* ARGSUSED */
 static int
-reencode_arc(client, in, out, count)
-    ClientPtr   client;
-    register short *in;
-    register char *out;
-    int         count;
+reencode_arc(ClientPtr client, register short *in,
+	     register char *out, int count)
 {
     register short diff;
     int         i;
@@ -511,9 +490,9 @@ reencode_arc(client, in, out, count)
 
 	/* reencode (width, height) */
 	COPY_AND_SWAPS(inval, in[2]);
-	REENCODE_USHORT(inval, out);
+	REENCODE_USHORT(inval, out, 0);
 	COPY_AND_SWAPS(inval, in[3]);
-	REENCODE_USHORT(inval, out);
+	REENCODE_USHORT(inval, out, 0);
 
 	/* reencode (angle1, angle2) */
 	COPY_AND_SWAPS(inval, in[4]);
@@ -525,11 +504,10 @@ reencode_arc(client, in, out, count)
 }
 
 int
-ProcLBXPolyPoint(client)
-    ClientPtr   client;
+ProcLBXPolyPoint(ClientPtr client)
 {
     REQUEST(xPolyPointReq);
-    int         (*reencode_rtn) ();
+    int (*reencode_rtn)(ClientPtr, short *, char *, int);
 
     reencode_rtn = (stuff->coordMode) ? reencode_points_previous :
 	reencode_points_origin;
@@ -537,11 +515,10 @@ ProcLBXPolyPoint(client)
 }
 
 int
-ProcLBXPolyLine(client)
-    ClientPtr   client;
+ProcLBXPolyLine(ClientPtr client)
 {
     REQUEST(xPolyLineReq);
-    int         (*reencode_rtn) ();
+   int (*reencode_rtn)(ClientPtr, short *, char *, int);
 
     reencode_rtn = (stuff->coordMode) ? reencode_points_previous :
 	reencode_points_origin;
@@ -549,29 +526,25 @@ ProcLBXPolyLine(client)
 }
 
 int
-ProcLBXPolySegment(client)
-    ClientPtr   client;
+ProcLBXPolySegment(ClientPtr client)
 {
     return reencode_poly(client, X_LbxPolySegment, reencode_segment);
 }
 
 int
-ProcLBXPolyRectangle(client)
-    ClientPtr   client;
+ProcLBXPolyRectangle(ClientPtr client)
 {
     return reencode_poly(client, X_LbxPolyRectangle, reencode_rectangle);
 }
 
 int
-ProcLBXPolyArc(client)
-    ClientPtr   client;
+ProcLBXPolyArc(ClientPtr client)
 {
     return reencode_poly(client, X_LbxPolyArc, reencode_arc);
 }
 
 int
-ProcLBXFillPoly(client)
-    ClientPtr   client;
+ProcLBXFillPoly(ClientPtr client)
 {
     REQUEST(xFillPolyReq);
     XServerPtr  server = client->server;
@@ -580,7 +553,7 @@ ProcLBXFillPoly(client)
     char       *after;
     int         bytes;
     int         space;
-    int         (*reencode_rtn) ();
+   int (*reencode_rtn)(ClientPtr, short *, char *, int);
 
     GFX_CACHE_DECLARE;
 
@@ -618,39 +591,33 @@ bail:
 }
 
 int
-ProcLBXPolyFillRectangle(client)
-    ClientPtr   client;
+ProcLBXPolyFillRectangle(ClientPtr client)
 {
     return reencode_poly(client, X_LbxPolyFillRectangle, reencode_rectangle);
 }
 
 int
-ProcLBXPolyFillArc(client)
-    ClientPtr   client;
+ProcLBXPolyFillArc(ClientPtr client)
 {
     return reencode_poly(client, X_LbxPolyFillArc, reencode_arc);
 }
 
 static int
-reencode_copy(client, in, out)
-    ClientPtr   client;
-    register xCopyAreaReq *in;
-    register char *out;
+reencode_copy(ClientPtr client, register xCopyAreaReq *in, register char *out)
 {
     char       *start_out = out;
 
-    SWAP_REENCODE_PSHORT(in->srcX, out);
-    SWAP_REENCODE_PSHORT(in->srcY, out);
-    SWAP_REENCODE_PSHORT(in->dstX, out);
-    SWAP_REENCODE_PSHORT(in->dstY, out);
-    SWAP_REENCODE_USHORT(in->width, out);
-    SWAP_REENCODE_USHORT(in->height, out);
+    SWAP_REENCODE_PSHORT(in->srcX, out, 0);
+    SWAP_REENCODE_PSHORT(in->srcY, out, 0);
+    SWAP_REENCODE_PSHORT(in->dstX, out, 0);
+    SWAP_REENCODE_PSHORT(in->dstY, out, 0);
+    SWAP_REENCODE_USHORT(in->width, out, 0);
+    SWAP_REENCODE_USHORT(in->height, out, 0);
     return out - start_out;
 }
 
 int
-ProcLBXCopyArea(client)
-    ClientPtr   client;
+ProcLBXCopyArea(ClientPtr client)
 {
     REQUEST(xCopyAreaReq);
     XServerPtr  server = client->server;
@@ -685,8 +652,7 @@ bail:
 }
 
 int
-ProcLBXCopyPlane(client)
-    ClientPtr   client;
+ProcLBXCopyPlane(ClientPtr client)
 {
     REQUEST(xCopyPlaneReq);
     XServerPtr  server = client->server;
@@ -722,22 +688,18 @@ bail:
 }
 
 static int
-reencode_text_pos(client, in, out)
-    ClientPtr   client;
-    xPolyTextReq *in;
-    char       *out;
+reencode_text_pos(ClientPtr client, xPolyTextReq *in, char *out)
 {
     char       *start_out;
 
     start_out = out;
-    SWAP_REENCODE_PSHORT(in->x, out);
-    SWAP_REENCODE_PSHORT(in->y, out);
+    SWAP_REENCODE_PSHORT(in->x, out, 0);
+    SWAP_REENCODE_PSHORT(in->y, out, 0);
     return out - start_out;
 }
 
 int
-ProcLBXPolyText(client)
-    ClientPtr   client;
+ProcLBXPolyText(ClientPtr client)
 {
     REQUEST(xPolyTextReq);
     XServerPtr  server = client->server;
@@ -782,8 +744,7 @@ bail:
 }
 
 int
-ProcLBXImageText(client)
-    ClientPtr   client;
+ProcLBXImageText(ClientPtr client)
 {
     REQUEST(xImageTextReq);
     XServerPtr  server = client->server;
@@ -829,8 +790,7 @@ bail:
 }
 
 static void
-SwapXPutImage(req)
-    xPutImageReq *req;
+SwapXPutImage(xPutImageReq *req)
 {
     char        n;
 
@@ -841,16 +801,14 @@ SwapXPutImage(req)
 }
 
 static char *
-reencode_putimage(stuff, newreq)
-    xPutImageReq *stuff;
-    xLbxPutImageReq *newreq;
+reencode_putimage(xPutImageReq *stuff, xLbxPutImageReq *newreq)
 {
     char *out;
 
     if (stuff->format > ZPixmap || stuff->leftPad > 31 ||
 	!stuff->depth || stuff->depth > 32 ||
 	(stuff->format == ZPixmap && stuff->leftPad != 0))
-	return 0;
+	return NULL;
 
     out = (char *)newreq + sz_xLbxPutImageReq;
     if (!stuff->leftPad && stuff->depth <= 8)
@@ -860,10 +818,10 @@ reencode_putimage(stuff, newreq)
 	newreq->bitPacked = ((stuff->depth - 1) << 2);
 	*out++ = (stuff->format << 5) | stuff->leftPad;
     }
-    REENCODE_USHORT(stuff->width, out);
-    REENCODE_USHORT(stuff->height, out);
-    REENCODE_PSHORT(stuff->dstX, out);
-    REENCODE_PSHORT(stuff->dstY, out);
+    REENCODE_USHORT(stuff->width, out, NULL);
+    REENCODE_USHORT(stuff->height, out, NULL);
+    REENCODE_PSHORT(stuff->dstX, out, NULL);
+    REENCODE_PSHORT(stuff->dstY, out, NULL);
 
     return out;
 }
@@ -871,8 +829,7 @@ reencode_putimage(stuff, newreq)
 #define MaxPutImageSz sz_xLbxPutImageReq + 1 + 2 + 2 + 2 + 2 + GFX_REQ_PAD
 
 int
-ProcLBXPutImage(client)
-    ClientPtr   client;
+ProcLBXPutImage(ClientPtr client)
 {
     REQUEST(xPutImageReq);
     XServerPtr  server = client->server;
@@ -1070,8 +1027,7 @@ ProcLBXPutImage(client)
 
 
 int
-ProcLBXGetImage(client)
-    ClientPtr   client;
+ProcLBXGetImage(ClientPtr client)
 {
     REQUEST(xGetImageReq);
     ReplyStuffPtr nr;
@@ -1110,10 +1066,7 @@ ProcLBXGetImage(client)
 }
 
 static Bool
-GetLbxImageReply(client, nr, data)
-    ClientPtr   client;
-    ReplyStuffPtr nr;
-    char       *data;
+GetLbxImageReply(ClientPtr client, ReplyStuffPtr nr, char *data)
 {
     xLbxGetImageReply *rep;
     xGetImageReply reply;

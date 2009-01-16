@@ -91,6 +91,9 @@ static void VErrorF(const char*, va_list);
 #include "atomcache.h"
 #include "proxyopts.h"
 
+#include "tags.h"
+#include "lbxext.h"
+
 #include <stdlib.h>
 
 /*
@@ -99,18 +102,7 @@ static void VErrorF(const char*, va_list);
 extern Bool PartialNetwork;
 extern int lbxDebug;
 
-extern char protocolMode;
 extern Bool reconnectAfterCloseServer;
-extern Bool resetAfterLastClient;
-extern Bool terminateAfterLastClient;
-extern int  lbxTagCacheSize;
-extern Bool lbxUseLbx;
-extern Bool lbxUseTags;
-extern Bool lbxDoSquishing;
-extern Bool lbxCompressImages;
-extern Bool lbxDoAtomShortCircuiting;
-extern Bool lbxDoLbxGfx;
-extern Bool compStats;
 
 /*
  * Static vars
@@ -168,9 +160,7 @@ int zlevel = 6;
  * The functions
  */
 OsSigHandlerPtr
-OsSignal(sig, handler)
-    int sig;
-    OsSigHandlerPtr handler;
+OsSignal(int sig, OsSigHandlerPtr handler)
 {
 #ifdef X_NOT_POSIX
     return signal(sig, handler);
@@ -191,8 +181,7 @@ OsSignal(sig, handler)
 
 /* ARGSUSED */
 SIGVAL
-AutoResetServer (sig)
-    int	sig;
+AutoResetServer(int sig)
 {
     dispatchException |= DE_RESET;
     isItTimeToYield = TRUE;
@@ -209,15 +198,14 @@ AutoResetServer (sig)
 
 /* ARGSUSED */
 SIGVAL
-GiveUp(sig)
-    int	sig;
+GiveUp(int sig)
 {
     dispatchException |= DE_TERMINATE;
     isItTimeToYield = TRUE;
 }
 
 static void
-AbortServer()
+AbortServer(void)
 {
     fflush(stderr);
     if (CoreDump)
@@ -226,13 +214,12 @@ AbortServer()
 }
 
 void
-Error(str)
-    char *str;
+Error(char *str)
 {
     perror(str);
 }
 
-void UseMsg()
+void UseMsg(void)
 {
     ErrorF("use: lbxproxy [:<display>] [option]\n");
 #ifdef MEMBUG
@@ -277,19 +264,15 @@ void UseMsg()
     ErrorF("-cheatevents           cheat on events and errors for better performance\n");
 }
 
-void
-ShowHelpAndExit (status)
-    int status;
+static void
+ShowHelpAndExit(int status)
 {
     UseMsg ();
     exit (status);
 }
 
 static int
-proxyProcessArgument (argc, argv, i)
-    int argc;
-    char    **argv;
-    int i;
+proxyProcessArgument(int argc, char **argv, int i)
 {
     if (strcmp (argv[i], "-debug") == 0)
     {
@@ -453,9 +436,7 @@ proxyProcessArgument (argc, argv, i)
  * argc or any of the strings pointed to by argv.
  */
 void
-ProcessCommandLine ( argc, argv )
-int	argc;
-char	*argv[];
+ProcessCommandLine(int argc, char *argv[])
 
 {
     int i, skip;
@@ -545,8 +526,7 @@ char	*argv[];
  */
 
 unsigned long * 
-Xalloc (amount)
-    unsigned long amount;
+Xalloc(unsigned long amount)
 {
     register pointer  ptr;
 	
@@ -571,8 +551,7 @@ Xalloc (amount)
  *****************/
 
 unsigned long *
-Xcalloc (amount)
-    unsigned long   amount;
+Xcalloc(unsigned long amount)
 {
     unsigned long   *ret;
 
@@ -587,9 +566,7 @@ Xcalloc (amount)
  *****************/
 
 unsigned long *
-Xrealloc (ptr, amount)
-    register pointer ptr;
-    unsigned long amount;
+Xrealloc(register pointer ptr, unsigned long amount)
 {
 #ifdef MEMBUG
     if (!Must_have_memory && Memory_fail &&
@@ -620,15 +597,14 @@ Xrealloc (ptr, amount)
  *****************/    
 
 void
-Xfree(ptr)
-    register pointer ptr;
+Xfree(register pointer ptr)
 {
     if (ptr)
 	free((char *)ptr); 
 }
 
 void
-OsInitAllocator ()
+OsInitAllocator(void)
 {
 #ifdef MEMBUG
     static int	been_here;
@@ -696,9 +672,7 @@ ErrorF(const char * f, ...)
 }
 
 char *
-strnalloc(str, len)
-    char       *str;
-    int 	len;
+strnalloc(char *str, int len)
 {
     char       *t;
 
@@ -729,7 +703,7 @@ static WorkQueuePtr	*workQueueLast = &workQueue;
 
 /* ARGSUSED */
 void
-ProcessWorkQueue()
+ProcessWorkQueue(void)
 {
     WorkQueuePtr    q, n, p;
 
@@ -767,10 +741,8 @@ ProcessWorkQueue()
 }
 
 Bool
-QueueWorkProc (function, client, closure)
-    Bool	(*function)();
-    ClientPtr	client;
-    pointer	closure;
+QueueWorkProc(Bool (*function)(ClientPtr, pointer),
+	      ClientPtr client, pointer closure)
 {
     WorkQueuePtr    q;
 
@@ -797,17 +769,15 @@ QueueWorkProc (function, client, closure)
 typedef struct _SleepQueue {
     struct _SleepQueue	*next;
     ClientPtr		client;
-    Bool		(*function)();
+    Bool		(*function)(ClientPtr, pointer);
     pointer		closure;
 } SleepQueueRec, *SleepQueuePtr;
 
 static SleepQueuePtr	sleepQueue = NULL;
 
 Bool
-ClientSleep (client, function, closure)
-    ClientPtr	client;
-    Bool	(*function)();
-    pointer	closure;
+ClientSleep(ClientPtr client,
+	    Bool (*function)(ClientPtr, pointer), pointer closure)
 {
     SleepQueuePtr   q;
 
@@ -825,8 +795,7 @@ ClientSleep (client, function, closure)
 }
 
 Bool
-ClientSignal (client)
-    ClientPtr	client;
+ClientSignal(ClientPtr client)
 {
     SleepQueuePtr   q;
 
@@ -839,8 +808,7 @@ ClientSignal (client)
 }
 
 void
-ClientWakeup (client)
-    ClientPtr	client;
+ClientWakeup(ClientPtr client)
 {
     SleepQueuePtr   q, *prev;
 
@@ -860,8 +828,7 @@ ClientWakeup (client)
 }
 
 Bool
-ClientIsAsleep (client)
-    ClientPtr	client;
+ClientIsAsleep(ClientPtr client)
 {
     SleepQueuePtr   q;
 
@@ -908,8 +875,7 @@ char *__XOS2RedirRoot(char *fname)
 
 
 void
-LBXReadAtomsFile (server)
-    XServerPtr server;
+LBXReadAtomsFile(XServerPtr server)
 {
     FILE *f;
     char buf[256], *p;

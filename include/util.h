@@ -157,14 +157,14 @@ extern void ProcessWorkQueue(
 );
 
 extern Bool QueueWorkProc(
-    Bool (* /*function*/)(),
+    Bool (* /*function*/)(ClientPtr, pointer),
     ClientPtr /*client*/,
     pointer /*closure*/
 );
 
 extern Bool ClientSleep(
     ClientPtr /*client*/,
-    Bool (* /*function*/)(),
+    Bool (* /*function*/)(ClientPtr, pointer),
     pointer /*closure*/
 );
 

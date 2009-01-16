@@ -63,7 +63,7 @@ from The Open Group.
 
 typedef unsigned long CacheID;
 typedef unsigned long Cache;
-typedef void (*CacheFree) ();
+typedef void (*CacheFree) (CacheID id, ClientPtr client, pointer data, int flag);
 
 typedef struct _cache *CachePtr;
 

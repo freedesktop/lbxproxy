@@ -96,8 +96,8 @@ typedef struct _extinfo *ExtensionInfoPtr;
 typedef struct _LbxOptionsListRec {
     CARD8       optcode;
     Bool        negotiate;
-    int         (*req)();
-    int         (*reply)();
+    int         (*req)(XServerPtr, void *);
+    int         (*reply)(XServerPtr, void *, int);
 } LbxOptionsListRec;
 
 typedef struct _LbxDeltaOptionsRec {
@@ -112,8 +112,8 @@ typedef struct _LbxDeltaOptionsRec {
 typedef struct _LbxStreamComp {
     int         typelen;
     char        *type;
-    int         (*req)();
-    int         (*reply)();
+    int         (*req)(XServerPtr, void *);
+    int         (*reply)(XServerPtr, void *, int);
 } LbxStreamCompRec;
 
 typedef struct _LbxCmapAllMethod {

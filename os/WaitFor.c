@@ -95,9 +95,7 @@ mffs(fd_mask mask)
  *****************/
 
 int
-WaitForSomething(pClientsReady, poll)
-    int *pClientsReady;
-    Bool poll;
+WaitForSomething(int *pClientsReady, Bool poll)
 {
     int i;
     struct timeval zerowt = {0, 0};

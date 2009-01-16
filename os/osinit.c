@@ -49,9 +49,10 @@ SOFTWARE.
 #include <stdio.h>
 #include "misc.h"
 #include "util.h"
+#include "os.h"
 
 void
-OsInit()
+OsInit(void)
 {
     static Bool been_here = FALSE;
 

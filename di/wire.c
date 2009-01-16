@@ -112,18 +112,14 @@ int lbxDebug = 0;
 /*
  * Local functions
  */
-static void LbxOnlyListenToOneClient();
-static void LbxListenToAllClients();
+static void LbxOnlyListenToOneClient(ClientPtr client);
+static void LbxListenToAllClients(XServerPtr server);
 
 /*
  * Any request that could be delta compressed comes through here
  */
 void
-WriteReqToServer(client, len, buf, checkLargeRequest)
-    ClientPtr   client;
-    int         len;
-    char       *buf;
-    Bool	checkLargeRequest;
+WriteReqToServer(ClientPtr client, int len, char *buf, Bool checkLargeRequest)
 {
     XServerPtr  server = client->server;
     xLbxDeltaReq *p = (xLbxDeltaReq *) server->tempdeltabuf;
@@ -184,13 +180,8 @@ WriteReqToServer(client, len, buf, checkLargeRequest)
 }
 
 void
-_write_to_server(client, compressed, len, buf, checkLarge, startOfRequest)
-    ClientPtr   client;
-    Bool        compressed;
-    int         len;
-    char       *buf;
-    Bool	checkLarge;
-    Bool	startOfRequest;
+_write_to_server(ClientPtr client, Bool compressed, int len, char *buf,
+		 Bool checkLarge, Bool startOfRequest)
 {
     XServerPtr  server = client->server;
     unsigned reqSize;
@@ -296,22 +287,15 @@ _write_to_server(client, compressed, len, buf, checkLarge, startOfRequest)
 }
 
 void
-WriteToServer(client, len, buf, startOfRequest, checkLargeRequest)
-    ClientPtr   client;
-    int         len;
-    char       *buf;
-    Bool	startOfRequest;
-    Bool	checkLargeRequest;
+WriteToServer(ClientPtr client, int len, char *buf,
+	      Bool startOfRequest, Bool checkLargeRequest)
 {
     _write_to_server(client, TRUE, len, buf, checkLargeRequest, startOfRequest);
 }
 
 void
-WriteToServerUncompressed(client, len, buf, startOfRequest)
-    ClientPtr   client;
-    int         len;
-    char       *buf;
-    Bool	startOfRequest;
+WriteToServerUncompressed(ClientPtr client,
+			  int len, char *buf, Bool startOfRequest)
 {
     _write_to_server(client, FALSE, len, buf, TRUE, startOfRequest);
 }
@@ -320,9 +304,7 @@ WriteToServerUncompressed(client, len, buf, startOfRequest)
  * the client they're being executed for
  */
 Bool
-NewClient(client, setuplen)
-    ClientPtr   client;
-    int         setuplen;
+NewClient(ClientPtr client, int setuplen)
 {
     xLbxNewClientReq n;
     XServerPtr  server = client->server;
@@ -338,8 +320,7 @@ NewClient(client, setuplen)
 }
 
 void
-CloseClient(client)
-    ClientPtr   client;
+CloseClient(ClientPtr client)
 {
     xLbxCloseClientReq n;
     XServerPtr  server = client->server;
@@ -365,9 +346,7 @@ CloseClient(client)
 }
 
 void
-ModifySequence(client, num)
-    ClientPtr   client;
-    int         num;
+ModifySequence(ClientPtr client, int num)
 {
     xLbxModifySequenceReq req;
     XServerPtr  server = client->server;
@@ -385,18 +364,13 @@ ModifySequence(client, num)
 }
 
 void
-AllowMotion(client, num)
-    ClientPtr   client;
-    int         num;
+AllowMotion(ClientPtr client, int num)
 {
     client->server->motion_allowed += num;
 }
 
 void
-SendIncrementPixel(client, cmap, pixel)
-    ClientPtr   client;
-    XID         cmap;
-    unsigned long pixel;
+SendIncrementPixel(ClientPtr client, XID cmap, unsigned long pixel)
 {
     xLbxIncrementPixelReq req;
     XServerPtr  server = client->server;
@@ -442,8 +416,7 @@ SendAllocColor(
 }
 
 void
-SendGetModifierMapping(client)
-    ClientPtr   client;
+SendGetModifierMapping(ClientPtr client)
 {
     xLbxGetModifierMappingReq req;
     XServerPtr  server = client->server;
@@ -461,8 +434,7 @@ SendGetModifierMapping(client)
 }
 
 void
-SendGetKeyboardMapping(client)
-    ClientPtr   client;
+SendGetKeyboardMapping(ClientPtr client)
 {
     xLbxGetKeyboardMappingReq req;
     XServerPtr  server = client->server;
@@ -487,9 +459,7 @@ SendGetKeyboardMapping(client)
 }
 
 void
-SendQueryFont(client, fid)
-    ClientPtr   client;
-    XID         fid;
+SendQueryFont(ClientPtr client, XID fid)
 {
     xLbxQueryFontReq req;
     XServerPtr  server = client->server;
@@ -508,14 +478,8 @@ SendQueryFont(client, fid)
 }
 
 void
-SendChangeProperty(client, win, prop, type, format, mode, num)
-    ClientPtr   client;
-    Window      win;
-    Atom        prop,
-                type;
-    int         format,
-                mode;
-    unsigned long num;
+SendChangeProperty(ClientPtr client, Window win, Atom prop, Atom type,
+		   int format, int mode, unsigned long num)
 {
     xLbxChangePropertyReq req;
     XServerPtr  server = client->server;
@@ -540,14 +504,8 @@ SendChangeProperty(client, win, prop, type, format, mode, num)
 }
 
 void
-SendGetProperty(client, win, prop, type, delete, off, len)
-    ClientPtr   client;
-    Window      win;
-    Atom        prop,
-                type;
-    Bool        delete;
-    unsigned long off,
-                len;
+SendGetProperty(ClientPtr client, Window win, Atom prop, Atom type,
+		Bool delete, unsigned long off, unsigned long len)
 {
     xLbxGetPropertyReq req;
     XServerPtr  server = client->server;
@@ -572,9 +530,7 @@ SendGetProperty(client, win, prop, type, delete, off, len)
 }
 
 void
-SendInvalidateTag(client, tag)
-    ClientPtr   client;
-    XID         tag;
+SendInvalidateTag(ClientPtr client, XID tag)
 {
     xLbxInvalidateTagReq req;
     XServerPtr  server;
@@ -596,11 +552,7 @@ SendInvalidateTag(client, tag)
 }
 
 void
-SendTagData(client, tag, len, data)
-    ClientPtr   client;
-    XID         tag;
-    unsigned long len;
-    pointer     data;
+SendTagData(ClientPtr client, XID tag, unsigned long len, pointer data)
 {
     xLbxTagDataReq req,
                *reqp;
@@ -636,15 +588,9 @@ SendTagData(client, tag, len, data)
 }
 
 void
-SendGetImage(client, drawable, x, y, width, height, planeMask, format)
-    ClientPtr   client;
-    Drawable    drawable;
-    int         x;
-    int         y;
-    unsigned int width;
-    unsigned int height;
-    unsigned long planeMask;
-    int         format;
+SendGetImage(ClientPtr client, Drawable drawable, int x, int y,
+	     unsigned int width, unsigned int height,
+	     unsigned long planeMask, int format)
 {
     xLbxGetImageReq req;
     XServerPtr  server = client->server;
@@ -672,8 +618,7 @@ SendGetImage(client, drawable, x, y, width, height, planeMask, format)
 }
 
 static Bool
-SendInternAtoms (server)
-    XServerPtr server;
+SendInternAtoms(XServerPtr server)
 {
     xLbxInternAtomsReq *req;
     int reqSize, i, num;
@@ -723,10 +668,9 @@ SendInternAtoms (server)
 
 /*ARGSUSED*/
 static void
-InternAtomsReply (server, rep)
-    XServerPtr  server;
-    xLbxInternAtomsReply *rep;
+InternAtomsReply(XServerPtr server, void *_rep)
 {
+    xLbxInternAtomsReply *rep = _rep;
     Atom *atoms = (Atom *) ((char *) rep + sz_xLbxInternAtomsReplyHdr);
     int i;
 
@@ -749,12 +693,10 @@ InternAtomsReply (server, rep)
 
 
 static unsigned long pendingServerReplySequence;
-static void (*serverReplyFunc) ();
+static void (*serverReplyFunc)(XServerPtr server, void *rep);
 
 static void
-ServerReply(server, rep)
-    XServerPtr  server;
-    xReply     *rep;
+ServerReply(XServerPtr server, xReply *rep)
 {
     if (serverReplyFunc &&
 	    rep->generic.sequenceNumber == pendingServerReplySequence) {
@@ -770,28 +712,23 @@ ServerReply(server, rep)
 	 */
 
 	if (rep->generic.sequenceNumber == pendingServerReplySequence)
-	    serverReplyFunc = 0;
+	    serverReplyFunc = NULL;
     }
 }
 
 static void
-ExpectServerReply(server, func)
-    XServerPtr  server;
-    void        (*func) ();
+ExpectServerReply(XServerPtr server, void (*func)(XServerPtr, void*))
 {
     pendingServerReplySequence = server->serverClient->sequence;
     serverReplyFunc = func;
 }
 
-extern int  (*ServerVector[]) ();
+extern int  (*ServerVector[])(ClientPtr);
 
 static unsigned long
-ServerRequestLength(req, sc, gotnow, partp)
-    xReq       *req;
-    ClientPtr   sc;
-    int         gotnow;
-    Bool       *partp;
+ServerRequestLength(void *_req, ClientPtr sc, int gotnow, Bool *partp)
 {
+    xReq *req = _req;
     XServerPtr  server = servers[sc->lbxIndex];
     ClientPtr   client = server->recv;
     xReply     *rep;
@@ -841,8 +778,7 @@ ServerRequestLength(req, sc, gotnow, partp)
 }
 
 int
-ServerProcStandardEvent(sc)
-    ClientPtr   sc;
+ServerProcStandardEvent(ClientPtr sc)
 {
     xReply     *rep;
     XServerPtr  server = servers[sc->lbxIndex];
@@ -1119,8 +1055,7 @@ ServerProcStandardEvent(sc)
 }
 
 static void
-LbxIgnoreAllClients(server)
-    XServerPtr  server;
+LbxIgnoreAllClients(XServerPtr server)
 {
     if (!server->lbxIgnoringAll) {
 	if (GrabInProgress) {
@@ -1134,8 +1069,7 @@ LbxIgnoreAllClients(server)
 
 /* ARGSUSED */
 static void
-LbxAttendAllClients(server)
-    XServerPtr  server;
+LbxAttendAllClients(XServerPtr server)
 {
     if (server->lbxIgnoringAll) {
 	ListenToAllClients();
@@ -1149,8 +1083,7 @@ LbxAttendAllClients(server)
 
 /* ARGSUSED */
 static void
-LbxOnlyListenToOneClient(client)
-    ClientPtr   client;
+LbxOnlyListenToOneClient(ClientPtr client)
 {
     /*
      * For a multi-display proxy, there is no need to do anything -
@@ -1162,8 +1095,7 @@ LbxOnlyListenToOneClient(client)
 
 /* ARGSUSED */
 static void
-LbxListenToAllClients(server)
-    XServerPtr server;
+LbxListenToAllClients(XServerPtr server)
 {
     /*
      * For a multi-display proxy, there is no need to do anything -
@@ -1175,14 +1107,12 @@ LbxListenToAllClients(server)
 
 /* ARGSUSED */
 static Bool
-ProxyWorkProc(dummy, index)
-    pointer     dummy;
-    int         index;
+ProxyWorkProc(ClientPtr unused_client, pointer index)
 {
     XServerPtr  server;
     xLbxAllowMotionReq req;
 
-    if ((server = servers[index]) == 0)
+    if ((server = servers[(int)index]) == 0)
 	return TRUE;
     if (!server->initialized)
 	return TRUE;
@@ -1222,8 +1152,7 @@ ProxyWorkProc(dummy, index)
 Bool reconnectAfterCloseServer = FALSE;
 
 void
-CloseServer(client)
-    ClientPtr   client;	/* This client is connected to a display server */
+CloseServer(ClientPtr client /* This client is connected to a display server */)
 {
     XServerPtr  server;
     int         i;
@@ -1316,10 +1245,9 @@ CloseServer(client)
 
 
 static void
-StartProxyReply(server, rep)
-    XServerPtr  server;
-    xLbxStartReply *rep;
+StartProxyReply(XServerPtr server, void *_rep)
 {
+    xLbxStartReply *rep = _rep;
     int         replylen;
 
     replylen = (rep->length << 2) + sz_xLbxStartReply - sz_xLbxStartReplyHdr;
@@ -1368,8 +1296,10 @@ StartProxyReply(server, rep)
 	    (*server->lbxNegOpt.streamOpts.streamCompInit) (
 		server->fd, server->lbxNegOpt.streamOpts.streamCompArg);
 	SwitchConnectionFuncs(server->serverClient,
-	    server->lbxNegOpt.streamOpts.streamCompRead,
-	    server->lbxNegOpt.streamOpts.streamCompWriteV);
+			      (int (*)(int, void *, int))
+			      server->lbxNegOpt.streamOpts.streamCompRead,
+			      (int (*)(int, void *, int))
+			      server->lbxNegOpt.streamOpts.streamCompWriteV);
 	extra += len;
 	server->lbxNegOpt.streamOpts.streamCompStuffInput(server->fd, 
 							  extra, 
@@ -1397,8 +1327,7 @@ StartProxyReply(server, rep)
 }
 
 static void
-StartProxy(server)
-    XServerPtr  server;
+StartProxy(XServerPtr server)
 {
     char        buf[1024];
     int         reqlen;
@@ -1421,11 +1350,7 @@ StartProxy(server)
 }
 
 static Bool
-InitServer (dpy_name, i, server, sequencep)
-    char*	dpy_name;
-    int		i;
-    XServerPtr	server;
-    int*	sequencep;
+InitServer(char *dpy_name, int i, XServerPtr server, int *sequencep)
 {
     server->index = i;
 
@@ -1473,7 +1398,7 @@ InitServer (dpy_name, i, server, sequencep)
      * When a client connects, its requestVector will be set to its
      * server's requestVector.
      */
-    server->requestVector = (int (**)()) xalloc (sizeof (ProcVector));
+    server->requestVector = (int (**)(ClientPtr)) xalloc (sizeof (ProcVector));
     if (!server->requestVector) return FALSE;
     memcpy (server->requestVector, ProcVector, sizeof (ProcVector));
 
@@ -1492,8 +1417,7 @@ InitServer (dpy_name, i, server, sequencep)
 }
 
 Bool
-ConnectToServer(dpy_name)
-    char       *dpy_name;
+ConnectToServer(char *dpy_name)
 {
     int         i, j;
     XServerPtr  server;

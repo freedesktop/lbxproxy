@@ -75,9 +75,7 @@ in this Software without prior written authorization from The Open Group.
 #include "atomcache.h"
 
 static int
-Hash(string, len)
-    char       *string;
-    int		len;
+Hash(char *string, int len)
 {
     int         h;
 
@@ -90,8 +88,7 @@ Hash(string, len)
 }
 
 static Bool
-ResizeHashTable(server)
-    XServerPtr	server;
+ResizeHashTable(XServerPtr server)
 {
     int         newHashSize;
     int         newHashMask;
@@ -134,9 +131,7 @@ ResizeHashTable(server)
 }
 
 static Bool
-ResizeReverseMap(server, atom)
-    XServerPtr	server;
-    Atom	atom;
+ResizeReverseMap(XServerPtr server, Atom atom)
 {
     int oldMapSize = 0;
 
@@ -167,12 +162,8 @@ ResizeReverseMap(server, atom)
 }
 
 Atom
-LbxMakeAtom(server, string, len, atom, makeit)
-    XServerPtr	server;
-    char       *string;
-    Atom        atom;
-    unsigned    len;
-    int         makeit;
+LbxMakeAtom(XServerPtr server, char *string, unsigned len,
+	    Atom atom, int makeit)
 {
     AtomListPtr a;
     int         hash;
@@ -243,19 +234,15 @@ LbxMakeAtom(server, string, len, atom, makeit)
 }
 
 char *
-NameForAtom(server, atom)
-    XServerPtr	server;
-    Atom        atom;
+NameForAtom(XServerPtr server, Atom atom)
 {
     if (atom != None && atom <= server->lastAtom && server->reverseMap[atom])
 	return server->reverseMap[atom]->name;
-    return 0;
+    return NULL;
 }
 
 unsigned
-FlagsForAtom(server, atom)
-    XServerPtr	server;
-    Atom        atom;
+FlagsForAtom(XServerPtr server, Atom atom)
 {
     if (atom != None && atom <= server->lastAtom && server->reverseMap[atom])
 	return server->reverseMap[atom]->flags;
@@ -263,7 +250,7 @@ FlagsForAtom(server, atom)
 }
 
 void
-FreeAtoms()
+FreeAtoms(void)
 {
     int         i;
 

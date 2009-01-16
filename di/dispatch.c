@@ -33,8 +33,6 @@
 #include "resource.h"
 #include "pm.h"
 
-extern int (* InitialVector[3]) ();
-
 static void KillAllClients(
     void
 );
@@ -46,7 +44,7 @@ HandleLargeRequest(
 
 int nextFreeClientID; /* always MIN free client ID */
 int nClients;	/* number active clients */
-char *display_name = 0;
+char *display_name = NULL;
 volatile char dispatchException = 0;
 volatile char isItTimeToYield;
 Bool lbxUseLbx = TRUE;
@@ -62,7 +60,7 @@ extern char *atomsFile;
 #define MINOROP ((xReq *)client->requestBuffer)->data
 
 int
-Dispatch ()
+Dispatch (void)
 {
     register int        *clientReady;     /* array of request ready clients */
     register int	result = 0;
@@ -158,12 +156,8 @@ Dispatch ()
 }
 
 void
-SendErrorToClient(client, majorCode, minorCode, resId, errorCode)
-    ClientPtr client;
-    unsigned int majorCode;
-    unsigned int minorCode;
-    XID resId;
-    int errorCode;
+SendErrorToClient(ClientPtr client, unsigned int majorCode,
+		  unsigned int minorCode, XID resId, int errorCode)
 {
     xError      rep;
     int		n;
@@ -200,9 +194,7 @@ SendErrorToClient(client, majorCode, minorCode, resId, errorCode)
  *************************/
 
 ClientPtr
-NextAvailableClient(ospriv, connect_fd)
-    pointer ospriv;
-    int connect_fd;
+NextAvailableClient(pointer ospriv, int connect_fd)
 {
     register int i;
     register ClientPtr client;
@@ -281,8 +273,7 @@ NextAvailableClient(ospriv, connect_fd)
 }
 
 int
-ProcInitialConnection(client)
-    register ClientPtr client;
+ProcInitialConnection(register ClientPtr client)
 {
     REQUEST(xReq);
     register xConnClientPrefix *prefix;
@@ -308,8 +299,7 @@ ProcInitialConnection(client)
 }
 
 int
-ProcEstablishConnection(client)
-    register ClientPtr client;
+ProcEstablishConnection(register ClientPtr client)
 {
     register xConnClientPrefix *prefix;
     register int i;
@@ -365,8 +355,7 @@ Bool resetAfterLastClient = FALSE;
 Bool terminateAfterLastClient = FALSE;
 
 void
-CloseDownClient(client)
-    register ClientPtr client;
+CloseDownClient(register ClientPtr client)
 {
     if (!client->clientGone)
     {
@@ -426,7 +415,7 @@ CloseDownClient(client)
 }
 
 static void
-KillAllClients()
+KillAllClients(void)
 {
     int i;
     for (i=1; i<currentMaxClients; i++)
@@ -439,15 +428,13 @@ KillAllClients()
     }
 }
 
-extern void (*ZeroPadReqVector[128]) ();
+extern void (*ZeroPadReqVector[128])(void *);
 
 int
-ProcStandardRequest (client)
-    ClientPtr	client;
+ProcStandardRequest (ClientPtr client)
 {
     REQUEST(xReq);
-    void (*zeroPadProc)();
-    extern int lbxZeroPad;
+    void (*zeroPadProc)(void *);
 
     if (lbxZeroPad &&
 	(MAJOROP < 128) && (zeroPadProc = ZeroPadReqVector[MAJOROP]))
@@ -459,8 +446,7 @@ ProcStandardRequest (client)
 
 /* ARGSUSED */
 int
-ProcBadRequest (client)
-    ClientPtr	client;
+ProcBadRequest (ClientPtr client)
 {
     return BadRequest;
 }
@@ -471,7 +457,7 @@ ProcBadRequest (client)
  */
 
 void
-AdjustProcVector()
+AdjustProcVector(void)
 {
     int         i;
 
@@ -537,7 +523,7 @@ AdjustProcVector()
 
 
 static void
-HandleLargeRequest ()
+HandleLargeRequest (void)
 
 {
     LbxLargeRequestRec *largeRequest = largeRequestQueue[0];

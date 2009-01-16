@@ -55,9 +55,7 @@ in this Software without prior written authorization from The Open Group.
 #include	"swap.h"
 
 void
-SwapConnSetup(pConnSetup, pConnSetupT)
-    xConnSetup *pConnSetup,
-               *pConnSetupT;
+SwapConnSetup(xConnSetup *pConnSetup, xConnSetup *pConnSetupT)
 {
     cpswapl(pConnSetup->release, pConnSetupT->release);
     cpswapl(pConnSetup->ridBase, pConnSetupT->ridBase);
@@ -76,9 +74,7 @@ SwapConnSetup(pConnSetup, pConnSetupT)
 }
 
 void
-SwapWinRoot(pRoot, pRootT)
-    xWindowRoot *pRoot,
-               *pRootT;
+SwapWinRoot(xWindowRoot *pRoot, xWindowRoot *pRootT)
 {
     cpswapl(pRoot->windowId, pRootT->windowId);
     cpswapl(pRoot->defaultColormap, pRootT->defaultColormap);
@@ -99,9 +95,7 @@ SwapWinRoot(pRoot, pRootT)
 }
 
 void
-SwapVisual(pVis, pVisT)
-    xVisualType *pVis,
-               *pVisT;
+SwapVisual(xVisualType *pVis, xVisualType *pVisT)
 {
     cpswapl(pVis->visualID, pVisT->visualID);
     pVisT->class = pVis->class;
@@ -113,9 +107,7 @@ SwapVisual(pVis, pVisT)
 }
 
 void
-WriteSConnSetupPrefix(pClient, pcsp)
-    ClientPtr		pClient;
-    xConnSetupPrefix	*pcsp;
+WriteSConnSetupPrefix(ClientPtr pClient, xConnSetupPrefix *pcsp)
 {
     xConnSetupPrefix	cspT;
 
@@ -128,10 +120,7 @@ WriteSConnSetupPrefix(pClient, pcsp)
 }
 
 void
-WriteSConnectionInfo(pClient, size, pInfo)
-    ClientPtr   pClient;
-    unsigned long size;
-    char       *pInfo;
+WriteSConnectionInfo(ClientPtr pClient, unsigned long size, char *pInfo)
 {
     int         i,
                 j,
@@ -186,8 +175,7 @@ WriteSConnectionInfo(pClient, size, pInfo)
 }
 
 void
-SwapGetPropertyReply(rep)
-    xGetPropertyReply *rep;
+SwapGetPropertyReply(xGetPropertyReply *rep)
 {
     char        n;
 
@@ -199,8 +187,7 @@ SwapGetPropertyReply(rep)
 }
 
 void
-SwapInternAtomReply(rep)
-    xInternAtomReply *rep;
+SwapInternAtomReply(xInternAtomReply *rep)
 {
     char        n;
 
@@ -210,8 +197,7 @@ SwapInternAtomReply(rep)
 }
 
 void
-SwapGetAtomNameReply(rep)
-    xGetAtomNameReply *rep;
+SwapGetAtomNameReply(xGetAtomNameReply *rep)
 {
     char        n;
 
@@ -221,8 +207,7 @@ SwapGetAtomNameReply(rep)
 }
 
 void
-SwapLookupColorReply(rep)
-    xLookupColorReply *rep;
+SwapLookupColorReply(xLookupColorReply *rep)
 {
     char        n;
 
@@ -237,8 +222,7 @@ SwapLookupColorReply(rep)
 }
 
 void
-SwapAllocColorReply(rep)
-    xAllocColorReply *rep;
+SwapAllocColorReply(xAllocColorReply *rep)
 {
     char        n;
 
@@ -251,8 +235,7 @@ SwapAllocColorReply(rep)
 }
 
 void
-SwapAllocNamedColorReply(rep)
-    xAllocNamedColorReply *rep;
+SwapAllocNamedColorReply(xAllocNamedColorReply *rep)
 {
     char        n;
 
@@ -268,8 +251,7 @@ SwapAllocNamedColorReply(rep)
 }
 
 void
-SwapModmapReply(rep)
-    xGetModifierMappingReply *rep;
+SwapModmapReply(xGetModifierMappingReply *rep)
 {
     char        n;
 
@@ -278,8 +260,7 @@ SwapModmapReply(rep)
 }
 
 void
-SwapKeymapReply(rep)
-    xGetKeyboardMappingReply *rep;
+SwapKeymapReply(xGetKeyboardMappingReply *rep)
 {
     char        n;
 
@@ -288,8 +269,7 @@ SwapKeymapReply(rep)
 }
 
 void
-SwapGetImageReply(rep)
-    xGetImageReply *rep;
+SwapGetImageReply(xGetImageReply *rep)
 {
     char n;
 
@@ -299,8 +279,7 @@ SwapGetImageReply(rep)
 }
 
 void
-SwapQueryExtensionReply(rep)
-    xQueryExtensionReply	*rep;
+SwapQueryExtensionReply(xQueryExtensionReply *rep)
 {
     char n;
 
@@ -309,8 +288,7 @@ SwapQueryExtensionReply(rep)
 }
 
 static void
-SwapCharInfo(pInfo)
-    xCharInfo  *pInfo;
+SwapCharInfo(xCharInfo *pInfo)
 {
     register char n;
 
@@ -323,8 +301,7 @@ SwapCharInfo(pInfo)
 }
 
 static void
-SwapFontInfo(pr)
-    xQueryFontReply *pr;
+SwapFontInfo(xQueryFontReply *pr)
 {
     register char n;
 
@@ -340,8 +317,7 @@ SwapFontInfo(pr)
 }
 
 static void
-SwapLbxFontInfo(pr)
-    xLbxFontInfo *pr;
+SwapLbxFontInfo(xLbxFontInfo *pr)
 {
     register char n;
 
@@ -360,9 +336,7 @@ SwapLbxFontInfo(pr)
  * to swap it for external use
  */
 void
-SwapFont(pr, native)
-    xQueryFontReply *pr;
-    Bool	native;
+SwapFont(xQueryFontReply *pr, Bool native)
 {
     unsigned    i;
     xCharInfo  *pxci;
@@ -396,9 +370,7 @@ SwapFont(pr, native)
 }
 
 void
-LbxSwapFontInfo(pr, compressed)
-    xLbxFontInfo *pr;
-    Bool	compressed;
+LbxSwapFontInfo(xLbxFontInfo *pr, Bool compressed)
 {
     unsigned    i;
     xCharInfo  *pxci;

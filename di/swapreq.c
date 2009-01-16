@@ -56,9 +56,7 @@ in this Software without prior written authorization from The Open Group.
 
 /* Byte swap a list of longs */
 void
-SwapLongs(list, count)
-    register CARD32 *list;
-    register unsigned long count;
+SwapLongs(register CARD32 *list, register unsigned long count)
 {
     register char n;
 
@@ -84,9 +82,7 @@ SwapLongs(list, count)
 
 /* Byte swap a list of shorts */
 void
-SwapShorts(list, count)
-    register short *list;
-    register unsigned long count;
+SwapShorts(register short *list, register unsigned long count)
 {
     register char n;
 
@@ -119,8 +115,7 @@ SwapShorts(list, count)
 }
 
 void
-SwapConnClientPrefix(pCCP)
-    xConnClientPrefix *pCCP;
+SwapConnClientPrefix(xConnClientPrefix *pCCP)
 {
     register char n;
 
@@ -131,8 +126,7 @@ SwapConnClientPrefix(pCCP)
 }
 
 void
-SwapNewClient(r)
-    xLbxNewClientReq *r;
+SwapNewClient(xLbxNewClientReq *r)
 {
     char        n;
 
@@ -140,8 +134,7 @@ SwapNewClient(r)
 }
 
 void
-SwapCloseClient(r)
-    xLbxCloseClientReq *r;
+SwapCloseClient(xLbxCloseClientReq *r)
 {
     char        n;
 
@@ -149,8 +142,7 @@ SwapCloseClient(r)
 }
 
 void
-SwapModifySequence(r)
-    xLbxModifySequenceReq *r;
+SwapModifySequence(xLbxModifySequenceReq *r)
 {
     char        n;
 
@@ -158,8 +150,7 @@ SwapModifySequence(r)
 }
 
 void
-SwapIncrementPixel(r)
-    xLbxIncrementPixelReq *r;
+SwapIncrementPixel(xLbxIncrementPixelReq *r)
 {
     char        n;
 
@@ -169,21 +160,18 @@ SwapIncrementPixel(r)
 
 /* ARGSUSED */
 void
-SwapGetModifierMapping(r)
-    xLbxGetModifierMappingReq *r;
+SwapGetModifierMapping(xLbxGetModifierMappingReq *r)
 {
 }
 
 /* ARGSUSED */
 void
-SwapGetKeyboardMapping(r)
-    xLbxGetKeyboardMappingReq *r;
+SwapGetKeyboardMapping(xLbxGetKeyboardMappingReq *r)
 {
 }
 
 void
-SwapQueryFont(r)
-    xLbxQueryFontReq *r;
+SwapQueryFont(xLbxQueryFontReq *r)
 {
     char        n;
 
@@ -191,8 +179,7 @@ SwapQueryFont(r)
 }
 
 void
-SwapChangeProperty(r)
-    xLbxChangePropertyReq *r;
+SwapChangeProperty(xLbxChangePropertyReq *r)
 {
     char        n;
 
@@ -203,8 +190,7 @@ SwapChangeProperty(r)
 }
 
 void
-SwapGetProperty(r)
-    xLbxGetPropertyReq *r;
+SwapGetProperty(xLbxGetPropertyReq *r)
 {
     char        n;
 
@@ -216,8 +202,7 @@ SwapGetProperty(r)
 }
 
 void
-SwapGetImage (r)
-    xLbxGetImageReq *r;
+SwapGetImage(xLbxGetImageReq *r)
 {
     char        n;
 
@@ -231,8 +216,7 @@ SwapGetImage (r)
 
 
 void
-SwapInternAtoms(r)
-    xLbxInternAtomsReq *r;
+SwapInternAtoms(xLbxInternAtomsReq *r)
 {
     char n;
     char *ptr;
@@ -255,8 +239,7 @@ SwapInternAtoms(r)
 
 
 void
-SwapInvalidateTag(r)
-    xLbxInvalidateTagReq *r;
+SwapInvalidateTag(xLbxInvalidateTagReq *r)
 {
     char        n;
 
@@ -264,8 +247,7 @@ SwapInvalidateTag(r)
 }
 
 void
-SwapTagData(r)
-    xLbxTagDataReq *r;
+SwapTagData(xLbxTagDataReq *r)
 {
     char        n;
 
@@ -274,8 +256,7 @@ SwapTagData(r)
 }
 
 void
-SwapQueryExtension(r)
-    xLbxQueryExtensionReq *r;
+SwapQueryExtension(xLbxQueryExtensionReq *r)
 {
     char        n;
 
@@ -283,8 +264,7 @@ SwapQueryExtension(r)
 }
 
 void
-SwapLbxConnSetupPrefix(csp)
-    xLbxConnSetupPrefix *csp;
+SwapLbxConnSetupPrefix(xLbxConnSetupPrefix *csp)
 {
     char        n;
 
@@ -294,8 +274,7 @@ SwapLbxConnSetupPrefix(csp)
 }
 
 void
-SwapAllocColor(r)
-    xLbxAllocColorReq *r;
+SwapAllocColor(xLbxAllocColorReq *r)
 {
     char        n;
 
@@ -308,8 +287,7 @@ SwapAllocColor(r)
 
 
 void
-SwapGrabCmap(r)
-    xLbxGrabCmapReq *r;
+SwapGrabCmap(xLbxGrabCmapReq *r)
 {
     char        n;
 
@@ -317,8 +295,7 @@ SwapGrabCmap(r)
 }
 
 void
-SwapReleaseCmap(r)
-    xLbxReleaseCmapReq *r;
+SwapReleaseCmap(xLbxReleaseCmapReq *r)
 {
     char        n;
 

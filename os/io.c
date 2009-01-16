@@ -84,7 +84,6 @@ SOFTWARE.
 #endif
 #endif
 
-extern void MarkClientException();
 static int timesThisConnection = 0;
 static ConnectionInputPtr FreeInputs = (ConnectionInputPtr)NULL;
 static ConnectionOutputPtr FreeOutputs = (ConnectionOutputPtr)NULL;
@@ -105,13 +104,10 @@ static ConnectionOutputPtr AllocateUncompBuffer(
 
 
 unsigned long
-StandardRequestLength(req,client,got,partp)
-    xReq	*req;
-    ClientPtr	client;
-    int		got;
-    Bool    	*partp;
+StandardRequestLength(void *_req, ClientPtr client, int got, Bool *partp)
 {
-    int	    len;
+    int		 len;
+    xReq	*req = (xReq *)_req;
     
     if (got < sizeof (xReq))
     {
@@ -206,8 +202,7 @@ StandardRequestLength(req,client,got,partp)
         { timesThisConnection = 0; }
 
 int
-StandardReadRequestFromClient(client)
-    ClientPtr client;
+StandardReadRequestFromClient(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -456,8 +451,7 @@ StandardReadRequestFromClient(client)
 }
 
 int
-PendingClientOutput (client)
-    ClientPtr	client;
+PendingClientOutput(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
     ConnectionOutputPtr	oco = oc->output;
@@ -466,8 +460,7 @@ PendingClientOutput (client)
 }
 
 int
-CheckPendingClientInput (client)
-    ClientPtr	client;
+CheckPendingClientInput(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -490,8 +483,7 @@ CheckPendingClientInput (client)
 }
 
 void
-MarkConnectionWriteBlocked (client)
-    ClientPtr	client;
+MarkConnectionWriteBlocked(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
 
@@ -500,8 +492,7 @@ MarkConnectionWriteBlocked (client)
 }
 
 int
-BytesInClientBuffer (client)
-    ClientPtr	client;
+BytesInClientBuffer(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -512,10 +503,7 @@ BytesInClientBuffer (client)
 }
 
 void
-SkipInClientBuffer (client, nbytes, lenLastReq)
-    ClientPtr	client;
-    int		nbytes;
-    int		lenLastReq;
+SkipInClientBuffer(ClientPtr client, int nbytes, int lenLastReq)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -533,10 +521,7 @@ SkipInClientBuffer (client, nbytes, lenLastReq)
  **********************/
 
 Bool
-InsertFakeRequest(client, data, count)
-    ClientPtr client;
-    char *data;
-    int count;
+InsertFakeRequest(ClientPtr client, char *data, int count)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -612,8 +597,7 @@ InsertFakeRequest(client, data, count)
  **********************/
 
 void
-ResetCurrentRequest(client)
-    ClientPtr client;
+ResetCurrentRequest(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -651,12 +635,10 @@ static int padlength[4] = {0, 3, 2, 1};
  **********************/
 
 int
-StandardFlushClient(who, oc, extraBuf, extraCount)
-    ClientPtr who;
-    OsCommPtr oc;
-    char *extraBuf;
-    int extraCount; /* do not modify... returned below */
+StandardFlushClient(ClientPtr who, OsCommPtr oc, void *_extraBuf,
+		    int extraCount /* do not modify... returned below */)
 {
+    char *extraBuf = _extraBuf;
     register ConnectionOutputPtr oco = oc->output;
     int connection = oc->fd;
     XtransConnInfo trans_conn = oc->trans_conn;
@@ -830,9 +812,7 @@ StandardFlushClient(who, oc, extraBuf, extraCount)
 }
 
 static int
-ExpandOutputBuffer(oco, len)
-    ConnectionOutputPtr oco;
-    int len;
+ExpandOutputBuffer(ConnectionOutputPtr oco, int len)
 {
     unsigned char *obuf;
 
@@ -850,12 +830,10 @@ ExpandOutputBuffer(oco, len)
 }
 
 int
-LbxFlushClient(who, oc, extraBuf, extraCount)
-    ClientPtr who;
-    OsCommPtr oc;
-    char *extraBuf;
-    int extraCount; /* do not modify... returned below */
+LbxFlushClient(ClientPtr who, OsCommPtr oc, void *_extraBuf,
+	       int extraCount /* do not modify... returned below */)
 {
+    char *extraBuf = _extraBuf;
     ConnectionOutputPtr obuf;
     register ConnectionOutputPtr oco;
     int retval;
@@ -921,7 +899,7 @@ LbxFlushClient(who, oc, extraBuf, extraCount)
  **********************/
 
 void
-FlushAllOutput()
+FlushAllOutput(void)
 {
     register int index, base;
     register fd_mask mask;
@@ -976,11 +954,9 @@ FlushAllOutput()
  *****************/
 
 int
-StandardWriteToClient (who, count, buf)
-    ClientPtr who;
-    char *buf;
-    int count;
+StandardWriteToClient(ClientPtr who, int count, void *_buf)
 {
+    char *buf = _buf;
     OsCommPtr oc = (OsCommPtr)who->osPrivate;
     register ConnectionOutputPtr oco = oc->output;
     int padBytes;
@@ -1031,11 +1007,9 @@ StandardWriteToClient (who, count, buf)
 }
 
 int
-UncompressWriteToClient (who, count, buf)
-    ClientPtr who;
-    char *buf;
-    int count;
+UncompressWriteToClient(ClientPtr who, int count, void *_buf)
 {
+    char *buf = _buf;
     OsCommPtr oc = (OsCommPtr)who->osPrivate;
     register ConnectionOutputPtr oco;
     int paddedLen = count + padlength[count & 3];
@@ -1071,7 +1045,7 @@ UncompressWriteToClient (who, count, buf)
 	if (oco) {
 	    FreeOutputs = oco->next;
 
-	    oco->next = 0;
+	    oco->next = NULL;
 	    oco->count = 0;
 	    oco->nocompress = TRUE;
 
@@ -1116,7 +1090,7 @@ UncompressWriteToClient (who, count, buf)
 }
 
 static ConnectionInputPtr
-AllocateInputBuffer()
+AllocateInputBuffer(void)
 {
     register ConnectionInputPtr oci;
 
@@ -1137,7 +1111,7 @@ AllocateInputBuffer()
 }
 
 static ConnectionOutputPtr
-AllocateOutputBuffer()
+AllocateOutputBuffer(void)
 {
     register ConnectionOutputPtr oco;
 
@@ -1157,8 +1131,7 @@ AllocateOutputBuffer()
 }
 
 static ConnectionOutputPtr
-AllocateUncompBuffer(count)
-    int count;
+AllocateUncompBuffer(int count)
 {
     register ConnectionOutputPtr oco;
     int len = (count > BUFSIZE) ? count : BUFSIZE;
@@ -1179,8 +1152,7 @@ AllocateUncompBuffer(count)
 }
 
 void
-FreeOsBuffers(oc)
-    OsCommPtr oc;
+FreeOsBuffers(OsCommPtr oc)
 {
     register ConnectionInputPtr oci;
     register ConnectionOutputPtr oco;

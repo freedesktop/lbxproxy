@@ -18,3 +18,7 @@ lbxproxy.1
 missing
 stamp-h1
 *~
+*.o
+lbxproxy-*.tar.*
+ChangeLog
+tags

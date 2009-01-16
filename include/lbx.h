@@ -182,10 +182,10 @@ typedef struct {
 
 
 typedef struct _ClientPublic {
-    int             (*writeToClient) ();
-    int             (*uncompressedWriteToClient) ();
-    unsigned long   (*requestLength) ();
-    int             (*readRequest)();
+    int             (*writeToClient)(ClientPtr, int, void *);
+    int             (*uncompressedWriteToClient)(ClientPtr, int, void *);
+    unsigned long   (*requestLength)(void *, ClientPtr, int, Bool *);
+    int             (*readRequest)(ClientPtr);
 } ClientPublicRec, *ClientPublicPtr;
 
 typedef struct _Client {
@@ -436,62 +436,56 @@ extern int  getprop_tag,
 extern int  tag_bytes_unsent;	/* approx data kept off wire by tags */
 
 
-extern void DumpOtherStats();
-extern void ZeroOtherStats();
+extern void DumpOtherStats(void);
+extern void ZeroOtherStats(void);
 
 #endif /* LBX_STATS */
 
-extern void DumpCompressionStats();
-extern void ZeroCompressionStats();
+extern void DumpCompressionStats(void);
+extern void ZeroCompressionStats(void);
 
-/* tables.c */
-extern int ProcLBXInternAtom(
-    ClientPtr /*client*/
-);
+extern void CloseDownClient(ClientPtr client);
 
-extern int ProcLBXGetAtomName(
-    ClientPtr /*client*/
-);
+extern int ProcBadRequest(ClientPtr client);
+extern int ProcEstablishConnection(ClientPtr client);
+extern int ProcInitialConnection(ClientPtr client);
 
-extern int ProcLBXCreateColormap(
-    ClientPtr /*client*/
-);
+extern int ProcLBXAllocColor(ClientPtr client);
+extern int ProcLBXAllocColorCells(ClientPtr client);
+extern int ProcLBXAllocColorPlanes(ClientPtr client);
+extern int ProcLBXAllocNamedColor(ClientPtr client);
+extern int ProcLBXChangeProperty(ClientPtr client);
+extern int ProcLBXChangeWindowAttributes(ClientPtr client);
+extern int ProcLBXCopyArea(ClientPtr client);
+extern int ProcLBXCopyColormapAndFree(ClientPtr client);
+extern int ProcLBXCopyPlane(ClientPtr client);
+extern int ProcLBXCreateColormap(ClientPtr client);
+extern int ProcLBXPolyFillArc(ClientPtr client);
+extern int ProcLBXFillPoly(ClientPtr client);
+extern int ProcLBXPolyFillRectangle(ClientPtr client);
+extern int ProcLBXFreeColormap(ClientPtr client);
+extern int ProcLBXFreeColors(ClientPtr client);
+extern int ProcLBXGetAtomName(ClientPtr client);
+extern int ProcLBXGetGeometry(ClientPtr client);
+extern int ProcLBXGetKeyboardMapping(ClientPtr client);
+extern int ProcLBXGetModifierMapping(ClientPtr client);
+extern int ProcLBXGetProperty(ClientPtr client);
+extern int ProcLBXGetWindowAttributes(ClientPtr client);
+extern int ProcLBXGetImage(ClientPtr client);
+extern int ProcLBXImageText(ClientPtr client);
+extern int ProcLBXInternAtom(ClientPtr client);
+extern int ProcLBXLookupColor(ClientPtr client);
+extern int ProcLBXPolyArc(ClientPtr client);
+extern int ProcLBXPolyLine(ClientPtr client);
+extern int ProcLBXPolyPoint(ClientPtr client);
+extern int ProcLBXPolyRectangle(ClientPtr client);
+extern int ProcLBXPolySegment(ClientPtr client);
+extern int ProcLBXPolyText(ClientPtr client);
+extern int ProcLBXPutImage(ClientPtr client);
+extern int ProcLBXQueryExtension(ClientPtr client);
+extern int ProcLBXQueryFont(ClientPtr client);
 
-extern int ProcLBXAllocColor(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXAllocNamedColor(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXFreeColormap(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXCopyColormapAndFree(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXFreeColors(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXLookupColor(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXGetModifierMapping(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXGetKeyboardMapping(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXQueryFont(
-    ClientPtr /*client*/
-);
+extern int ProcStandardRequest(ClientPtr client);
 
 extern void FinishLBXRequest(
     ClientPtr /*client*/,
@@ -516,8 +510,6 @@ extern void SendLbxSync(
     ClientPtr /*client*/
 );
 
-/* dispatch.c */
-
 extern int Dispatch(
     void
 );
@@ -533,26 +525,6 @@ extern void SendErrorToClient(
 extern ClientPtr NextAvailableClient(
     pointer /*ospriv*/,
     int /* connect_fd */	/* the fd the client connected on */
-);
-
-extern int ProcInitialConnection(
-    ClientPtr /*client*/
-);
-
-extern int ProcEstablishConnection(
-    ClientPtr /*client*/
-);
-
-extern void CloseDownClient(
-    ClientPtr /*client*/
-);
-
-extern int ProcStandardRequest(
-    ClientPtr /*client*/
-);
-
-extern int ProcBadRequest(
-    ClientPtr /*client*/
 );
 
 extern void AdjustProcVector(
@@ -633,16 +605,6 @@ extern Bool UnsquishEvent(
     xReply * /*rep*/,
     xEvent * /*ev*/,
     int * /*lenp*/
-);
-
-/* props.c */
-
-extern int ProcLBXChangeProperty(
-    ClientPtr /*client*/
-);
-
-extern int ProcLBXGetProperty(
-    ClientPtr /*client*/
 );
 
 #endif

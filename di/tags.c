@@ -58,9 +58,7 @@ in this Software without prior written authorization from The Open Group.
 int         lbxTagCacheSize = 1 << 20;
 
 void
-TagsInit(server, useTags)
-    XServerPtr server;
-    Bool useTags;
+TagsInit(XServerPtr server, Bool useTags)
 {
     if (!useTags) {
 	lbxTagCacheSize = 0;
@@ -70,7 +68,7 @@ TagsInit(server, useTags)
 }
 
 void
-FreeTags()
+FreeTags(void)
 {
     int 	i;
 
@@ -84,11 +82,7 @@ FreeTags()
 
 /* ARGSUSED */
 static void
-cache_free(id, client, data, reason)
-    CacheID     id;
-    ClientPtr	client;
-    pointer     data;
-    int         reason;
+cache_free(CacheID id, ClientPtr client, pointer data, int reason)
 {
     TagData     tag = (TagData) data;
 
@@ -100,13 +94,8 @@ cache_free(id, client, data, reason)
 }
 
 Bool
-TagStoreData(server, cache, id, size, dtype, data)
-    XServerPtr  server;
-    Cache       cache;
-    CacheID     id;
-    int         size;
-    int         dtype;
-    pointer     data;
+TagStoreData(XServerPtr server, Cache cache, CacheID id,
+	     int size, int dtype, pointer data)
 {
     pointer	tdata;
 
@@ -118,13 +107,8 @@ TagStoreData(server, cache, id, size, dtype, data)
 }
 
 Bool
-TagStoreDataNC(server, cache, id, size, dtype, data)
-    XServerPtr  server;
-    Cache       cache;
-    CacheID     id;
-    int         size;
-    int         dtype;
-    pointer     data;
+TagStoreDataNC(XServerPtr server, Cache cache, CacheID id,
+	       int size, int dtype, pointer data)
 {
     TagData     tag;
     Bool	ret;
@@ -149,10 +133,7 @@ TagStoreDataNC(server, cache, id, size, dtype, data)
 }
 
 TagData
-TagGetTag(server, cache, id)
-    XServerPtr	server;
-    Cache       cache;
-    CacheID     id;
+TagGetTag(XServerPtr server, Cache cache, CacheID id)
 {
     TagData     tag;
 
@@ -163,10 +144,7 @@ TagGetTag(server, cache, id)
 }
 
 pointer
-TagGetData(server, cache, id)
-    XServerPtr	server;
-    Cache       cache;
-    CacheID     id;
+TagGetData(XServerPtr server, Cache cache, CacheID id)
 {
     TagData     tag;
 
@@ -180,11 +158,7 @@ TagGetData(server, cache, id)
 }
 
 void
-TagFreeData(server, cache, id, notify)
-    XServerPtr	server;
-    Cache       cache;
-    CacheID     id;
-    Bool        notify;
+TagFreeData(XServerPtr server, Cache cache, CacheID id, Bool notify)
 {
     assert(server->lbxNegOpt.useTags);
 

@@ -42,14 +42,10 @@ extern fd_set ClientsWithInput;
 extern fd_set ClientsWriteBlocked;
 extern fd_set OutputPending;
 
-/* WaitFor.c */
-
 extern int WaitForSomething(
     int * /*pClientsReady*/,
     Bool  /* poll */
 );
-
-/* connection.c */
 
 extern Bool NewOutputPending;
 extern Bool AnyClientsWriteBlocked;
@@ -96,14 +92,14 @@ extern ClientPtr AllocNewConnection(
 
 extern void SwitchConnectionFuncs(
     ClientPtr /*client*/,
-    int (* /*Read*/)(),
-    int (* /*Writev*/)()
+    int (* /*Read*/)(int, void *, int),
+    int (* /*Writev*/)(int, void *, int)
 );
 
 extern void StartOutputCompression(
     ClientPtr /*client*/,
-    void (* /*CompressOn*/)(),
-    void (* /*CompressOff*/)()
+    void (* /*CompressOn*/)(int),
+    void (* /*CompressOff*/)(int)
 );
 
 extern Bool EstablishNewConnections(
@@ -147,10 +143,8 @@ extern void MakeClientGrabPervious(
     ClientPtr /*client*/
 );
 
-/* io.c */
-
 extern unsigned long StandardRequestLength(
-    xReq * /*req*/,
+    void * /*req*/,
     ClientPtr /*client*/,
     int /*got*/,
     Bool * /*partp*/
@@ -198,23 +192,23 @@ extern void FlushAllOutput(
 extern int StandardWriteToClient(
     ClientPtr /*who*/,
     int /*count*/,
-    char * /*buf*/
+    void * /*buf*/
 );
 
 extern int UncompressWriteToClient(
     ClientPtr /*who*/,
     int /*count*/,
-    char * /*buf*/
+    void * /*buf*/
 );
 
 extern void ResetOsBuffers(
     void
 );
 
-/* osinit.c */
-
 extern void OsInit(
     void
 );
+
+extern void MarkClientException(ClientPtr client);
 
 #endif
