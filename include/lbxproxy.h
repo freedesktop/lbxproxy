@@ -52,7 +52,17 @@ in this Software without prior written authorization from The Open Group.
 #include "misc.h"
 #include "os.h"
 #include "util.h"
-#include <X11/extensions/lbxstr.h>
+#ifdef HAVE_X11_EXTENSIONS_LBXPROTO_H
+# include <X11/extensions/lbxproto.h>
+# ifdef DEBUG /* Debug macros formerly defined in lbxstr.h */
+extern int lbxDebug;
+#  define DBG(n,m)    if (lbxDebug & (n)) { fprintf m; } else
+# else
+#  define DBG(n,m)
+# endif /* DEBUG */
+#else
+# include <X11/extensions/lbxstr.h>
+#endif /* HAVE_X11_EXTENSIONS_LBXPROTO_H */
 
 /* we keep the ifdefs in the code as a guide to what's going on */
 /* but we want the proxy to work with all possible servers */

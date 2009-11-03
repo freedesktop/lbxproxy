@@ -55,6 +55,8 @@ in this Software without prior written authorization from The Open Group.
 # include "config.h"
 #endif
 
+#include <X11/Xdefs.h>
+
 #ifdef RETSIGTYPE /* autoconf AC_TYPE_SIGNAL */
 # define SIGVAL RETSIGTYPE
 #else /* Imake */

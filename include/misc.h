@@ -33,6 +33,10 @@ from The Open Group.
 #ifndef MISC_H
 #define MISC_H 1
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #define NEED_EVENTS
 #define NEED_REPLIES
 #include <X11/X.h>
@@ -44,7 +48,11 @@ from The Open Group.
 #include <X11/Xalloca.h>
 #include <X11/Xfuncs.h>
 #include <X11/Xfuncproto.h>
-#include <X11/extensions/lbxstr.h>
+#ifdef HAVE_X11_EXTENSIONS_LBXPROTO_H
+# include <X11/extensions/lbxproto.h>
+#else
+# include <X11/extensions/lbxstr.h>
+#endif
 
 #ifndef TRUE
 #define FALSE 0

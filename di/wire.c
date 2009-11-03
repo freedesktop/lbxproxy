@@ -74,7 +74,11 @@ in this Software without prior written authorization from The Open Group.
 
 #include <X11/ICE/ICElib.h>
 #ifdef BIGREQS
-#include <X11/extensions/bigreqstr.h>
+# ifdef HAVE_X11_EXTENSIONS_BIGREQSPROTO_H
+#  include <X11/extensions/bigreqsproto.h>
+# else
+#  include <X11/extensions/bigreqstr.h>
+# endif
 #endif
 
 /*

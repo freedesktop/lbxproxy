@@ -32,6 +32,7 @@ from The Open Group.
 #ifndef OS_H
 #define OS_H
 
+#include <X11/Xdefs.h>
 #include <X11/Xtrans/Xtrans.h>
 
 extern fd_set AllSockets;

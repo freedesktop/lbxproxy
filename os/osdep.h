@@ -53,6 +53,7 @@ SOFTWARE.
 #define MAXBUFSIZE (1 << 22)
 
 #include <X11/Xmd.h>
+#include <X11/Xdefs.h>
 
 #ifndef sgi	    /* SGI defines OPEN_MAX in a useless way */
 #ifndef X_NOT_POSIX

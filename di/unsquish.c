@@ -54,8 +54,12 @@ in this Software without prior written authorization from The Open Group.
 #define NEED_EVENTS
 #include <X11/Xproto.h>
 #include "misc.h"
-#define	_XLBX_SERVER_
-#include <X11/extensions/lbxstr.h>
+#ifdef HAVE_X11_EXTENSIONS_LBXPROTO_H
+# include <X11/extensions/lbxproto.h>
+#else
+# define  _XLBX_SERVER_
+# include <X11/extensions/lbxstr.h>
+#endif
 #include "proxyopts.h"
 #include "lbxproxy.h"
 

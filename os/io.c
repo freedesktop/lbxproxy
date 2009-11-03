@@ -68,7 +68,11 @@ SOFTWARE.
 #include "lbxproxy.h"
 
 #ifdef BIGREQS
-#include <X11/extensions/bigreqstr.h>
+# ifdef HAVE_X11_EXTENSIONS_BIGREQSPROTO_H
+#  include <X11/extensions/bigreqsproto.h>
+# else
+#  include <X11/extensions/bigreqstr.h>
+# endif
 #endif
 
 /* check for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX

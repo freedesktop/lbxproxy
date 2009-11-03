@@ -51,6 +51,7 @@ in this Software without prior written authorization from The Open Group.
 #ifndef _LBX_PROXYOPTS_H_
 #define _LBX_PROXYOPTS_H_
 
+#include <X11/Xdefs.h>
 #include <X11/extensions/lbximage.h>
 #include <X11/extensions/lbxopts.h>
 
