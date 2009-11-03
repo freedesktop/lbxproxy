@@ -21,7 +21,9 @@
 
 bin_PROGRAMS = lbxproxy
 
-lbxproxy_CFLAGS = $(LBXPROXY_CFLAGS) -I$(top_srcdir)/include	\
+AM_CFLAGS = $(CWARNFLAGS)
+
+AM_CPPFLAGS = $(LBXPROXY_CFLAGS) $(OS_CFLAGS) -I$(top_srcdir)/include	\
 	-DDEF_ATOMS_FILE=\"$(libdir)/X11/lbxproxy/AtomControl\" \
 	-D_BSD_SOURCE -DLBXPROXY_t -DTRANS_SERVER
 
@@ -117,7 +119,7 @@ MAN_SUBSTS = \
 SUFFIXES = .$(APP_MAN_SUFFIX) .man
 
 .man.$(APP_MAN_SUFFIX):
-	sed $(MAN_SUBSTS) < $< > $@
+	$(AM_V_GEN)$(SED) $(MAN_SUBSTS) < $< > $@
 
 EXTRA_DIST += ChangeLog
 MAINTAINERCLEANFILES = ChangeLog

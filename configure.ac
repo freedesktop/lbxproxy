@@ -26,9 +26,10 @@ AC_INIT(lbxproxy,[1.0.1], [https://bugs.freedesktop.org/enter_bug.cgi?product=xo
 AM_INIT_AUTOMAKE([dist-bzip2])
 AM_MAINTAINER_MODE
 
-# Require xorg-macros: XORG_CWARNFLAGS, XORG_CHANGELOG
-m4_ifndef([XORG_MACROS_VERSION], [AC_FATAL([must install xorg-macros 1.2 or later before running autoconf/autogen])])
-XORG_MACROS_VERSION(1.2)
+# Require xorg-macros 1.3 or later: XORG_DEFAULT_OPTIONS
+m4_ifndef([XORG_MACROS_VERSION],
+	  [m4_fatal([must install xorg-macros 1.3 or later before running autoconf/autogen])])
+XORG_MACROS_VERSION(1.3)
 
 AM_CONFIG_HEADER(config.h)
 
@@ -36,7 +37,7 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_CANONICAL_HOST
 
-XORG_CWARNFLAGS
+XORG_DEFAULT_OPTIONS
 
 case $host_os in
     linux*|gnu*|*-gnu)
@@ -46,12 +47,22 @@ case $host_os in
         OS_CFLAGS=
         ;;
 esac
+AC_SUBST(OS_CFLAGS)
 
 # Checks for pkg-config packages
 PKG_CHECK_MODULES(LBXPROXY, xtrans xext lbxutil x11 ice xproxymngproto bigreqsproto)
-LBXPROXY_CFLAGS="$CWARNFLAGS $LBXPROXY_CFLAGS $OS_CFLAGS"
 AC_SUBST(LBXPROXY_CFLAGS)
 AC_SUBST(LBXPROXY_LIBS)
+
+# Check which version of extension headers are installed
+save_CFLAGS="${CFLAGS}"
+CFLAGS="${CFLAGS} ${LBXPROXY_CFLAGS}"
+AC_CHECK_HEADERS([X11/extensions/lbxproto.h X11/extensions/bigreqsproto.h],
+[],[],[
+#include <X11/X.h>
+#include <X11/Xproto.h>
+])
+CFLAGS="${save_CFLAGS}"
 
 # Transport selection macro from xtrans.m4
 XTRANS_CONNECTION_FLAGS
