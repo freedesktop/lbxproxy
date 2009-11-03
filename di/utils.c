@@ -52,7 +52,7 @@ SOFTWARE.
 # include "config.h"
 #endif
 
-#include "lbx.h"
+#include "lbxproxy.h"
 #include <stdio.h>
 #include <stdlib.h>		/* getenv(), {m,re}alloc() */
 #ifdef X_POSIX_C_SOURCE

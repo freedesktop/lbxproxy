@@ -52,7 +52,7 @@ from The Open Group.
 
 #include	<stdio.h>
 #include	"misc.h"
-#include	"lbx.h"
+#include	"lbxproxy.h"
 #include	"assert.h"
 #include	"colormap.h"
 #include	"util.h"

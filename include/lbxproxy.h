@@ -1,4 +1,4 @@
-/* $Xorg: lbx.h,v 1.4 2001/02/09 02:05:32 xorgcvs Exp $ */
+/* $Xorg: lbxproxy.h,v 1.4 2001/02/09 02:05:32 xorgcvs Exp $ */
 /*
 
 Copyright 1996, 1998  The Open Group
@@ -45,10 +45,10 @@ in this Software without prior written authorization from The Open Group.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-/* $XFree86: xc/programs/lbxproxy/include/lbx.h,v 1.6 2001/12/14 20:00:55 dawes Exp $ */
+/* $XFree86: xc/programs/lbxproxy/include/lbxproxy.h,v 1.6 2001/12/14 20:00:55 dawes Exp $ */
 
-#ifndef _LBX_H_
-#define _LBX_H_
+#ifndef _LBXPROXY_H_
+#define _LBXPROXY_H_
 #include "misc.h"
 #include "os.h"
 #include "util.h"

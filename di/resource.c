@@ -79,7 +79,7 @@ SOFTWARE.
 #include "misc.h"
 #include "os.h"
 #include "resource.h" 
-#include "lbx.h" 
+#include "lbxproxy.h"
 #include "colormap.h"
 #include "wire.h"
 

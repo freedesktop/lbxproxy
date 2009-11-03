@@ -40,7 +40,7 @@
 
 #include	<stdio.h>
 #include	"assert.h"
-#include	"lbx.h"
+#include	"lbxproxy.h"
 #include	"atomcache.h"
 #include	"util.h"
 #include	"init.h"

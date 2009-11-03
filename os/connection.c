@@ -104,7 +104,7 @@ SOFTWARE.
 #include <X11/Xpoll.h>
 #include "osdep.h"
 #include "os.h"
-#include "lbx.h"
+#include "lbxproxy.h"
 #include "util.h"
 #include "pm.h"
 #include "wire.h"

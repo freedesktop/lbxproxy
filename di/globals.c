@@ -47,7 +47,7 @@ SOFTWARE.
 ********************************************************/
   
 #include "misc.h"
-#include "lbx.h"
+#include "lbxproxy.h"
 
 ClientPtr *clients;
 int  currentMaxClients;   /* current size of clients array */

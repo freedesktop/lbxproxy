@@ -65,7 +65,7 @@ lbxproxy_SOURCES = \
 	include/colormap.h	\
 	include/init.h		\
 	include/lbxext.h	\
-	include/lbx.h		\
+	include/lbxproxy.h	\
 	include/misc.h		\
 	include/os.h		\
 	include/pm.h		\

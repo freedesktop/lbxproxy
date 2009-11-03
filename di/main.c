@@ -48,7 +48,7 @@ in this Software without prior written authorization from The Open Group.
 /* $XFree86: xc/programs/lbxproxy/di/main.c,v 1.8 2001/01/21 21:19:39 tsi Exp $ */
 
 #include <stdlib.h>
-#include "lbx.h"
+#include "lbxproxy.h"
 #include "wire.h"
 #include "atomcache.h"
 #include "colormap.h"

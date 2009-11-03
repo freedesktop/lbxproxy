@@ -47,7 +47,7 @@ in this Software without prior written authorization from The Open Group.
  */
 /* $XFree86: xc/programs/lbxproxy/di/wire.c,v 1.14 2002/09/19 13:22:03 tsi Exp $ */
 
-#include "lbx.h"
+#include "lbxproxy.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "wire.h"

@@ -54,7 +54,7 @@ from The Open Group.
 #include	<stdio.h>
 #include	"assert.h"
 #include	"misc.h"
-#include	"lbx.h"
+#include	"lbxproxy.h"
 #include	"atomcache.h"
 #include	"util.h"
 #include	"tags.h"

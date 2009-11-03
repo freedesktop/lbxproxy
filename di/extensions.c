@@ -49,7 +49,7 @@ in this Software without prior written authorization from The Open Group.
 
 /* tracks server extensions */
 
-#include	"lbx.h"
+#include	"lbxproxy.h"
 #include	"assert.h"
 #include	"wire.h"
 #include	"lbxext.h"

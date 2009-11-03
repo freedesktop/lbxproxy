@@ -65,7 +65,7 @@ SOFTWARE.
 #include "os.h"
 #include <X11/Xpoll.h>
 #include "osdep.h"
-#include "lbx.h"
+#include "lbxproxy.h"
 
 #ifdef BIGREQS
 #include <X11/extensions/bigreqstr.h>

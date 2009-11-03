@@ -26,7 +26,7 @@
 #include "util.h"
 #include <X11/Xlibint.h>
 #include <X11/Xutil.h>
-#include "lbx.h"
+#include "lbxproxy.h"
 
 int (*InitialVector[3])(ClientPtr) =
 {

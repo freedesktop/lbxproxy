@@ -35,7 +35,7 @@ from The Open Group.
  */
 
 #include <X11/Xproto.h>
-#include "lbx.h"
+#include "lbxproxy.h"
 #include "lbxext.h"
 
 static void

@@ -57,7 +57,7 @@ in this Software without prior written authorization from The Open Group.
 #define	_XLBX_SERVER_
 #include <X11/extensions/lbxstr.h>
 #include "proxyopts.h"
-#include "lbx.h"
+#include "lbxproxy.h"
 
 #include	<stdio.h>
 

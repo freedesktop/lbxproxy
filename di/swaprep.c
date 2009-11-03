@@ -51,7 +51,7 @@ in this Software without prior written authorization from The Open Group.
 #include	<stdio.h>
 #include	"misc.h"
 #include	"assert.h"
-#include	"lbx.h"
+#include	"lbxproxy.h"
 #include	"swap.h"
 
 void

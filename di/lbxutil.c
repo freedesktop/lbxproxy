@@ -31,7 +31,7 @@
 #include	<stdio.h>
 #include	"misc.h"
 #include	"assert.h"
-#include	"lbx.h"
+#include	"lbxproxy.h"
 #include	"util.h"
 #include	"tags.h"
 #include	"resource.h"

@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include "assert.h"
-#include "lbx.h"
+#include "lbxproxy.h"
 #include "wire.h"
 #include "swap.h"
 #include "lbxext.h"

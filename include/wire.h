@@ -47,12 +47,12 @@ in this Software without prior written authorization from The Open Group.
  */
 /* $XFree86: xc/programs/lbxproxy/include/wire.h,v 1.7 2001/12/14 20:00:56 dawes Exp $ */
 
-#ifdef DEBUG 		/* Need this here because lbx.h undef's DEBUG */
+#ifdef DEBUG 		/* Need this here because lbxproxy.h undef's DEBUG */
 extern int lbxDebug;
 #endif
 
 #include "misc.h"
-#include "lbx.h"
+#include "lbxproxy.h"
 #include <X11/extensions/lbxdeltastr.h>
 #include <X11/extensions/lbximage.h>
 #include "proxyopts.h"
