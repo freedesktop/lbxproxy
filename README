@@ -13,3 +13,29 @@ clients will connect to lbxproxy, it is important that the user's
 network ID of the proxy.  lbxproxy does not get involved with how
 these entries are added to the .Xauthority file.  The user is
 responsible for setting it up.
+
+Note that the X server source from X.Org no longer supports the LBX
+extension, so this program is only useful in connecting to older X servers.
+
+All questions regarding this software should be directed at the
+Xorg mailing list:
+
+        http://lists.freedesktop.org/mailman/listinfo/xorg
+
+Please submit bug reports to the Xorg bugzilla:
+
+        https://bugs.freedesktop.org/enter_bug.cgi?product=xorg
+
+The master development code repository can be found at:
+
+        git://anongit.freedesktop.org/git/xorg/app/lbxproxy
+
+        http://cgit.freedesktop.org/xorg/app/lbxproxy
+
+For patch submission instructions, see:
+
+	http://www.x.org/wiki/Development/Documentation/SubmittingPatches
+
+For more information on the git code manager, see:
+
+        http://wiki.x.org/wiki/GitPage
