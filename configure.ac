@@ -65,4 +65,5 @@ CFLAGS="${save_CFLAGS}"
 # Transport selection macro from xtrans.m4
 XTRANS_CONNECTION_FLAGS
 
-AC_OUTPUT([Makefile])
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
