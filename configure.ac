@@ -33,8 +33,6 @@ XORG_MACROS_VERSION(1.3)
 
 AM_CONFIG_HEADER(config.h)
 
-AC_PROG_CC
-AC_PROG_INSTALL
 AC_CANONICAL_HOST
 
 XORG_DEFAULT_OPTIONS
@@ -51,8 +49,6 @@ AC_SUBST(OS_CFLAGS)
 
 # Checks for pkg-config packages
 PKG_CHECK_MODULES(LBXPROXY, xtrans xext lbxutil x11 ice xproxymngproto bigreqsproto)
-AC_SUBST(LBXPROXY_CFLAGS)
-AC_SUBST(LBXPROXY_LIBS)
 
 # Check which version of extension headers are installed
 save_CFLAGS="${CFLAGS}"
@@ -66,9 +62,5 @@ CFLAGS="${save_CFLAGS}"
 
 # Transport selection macro from xtrans.m4
 XTRANS_CONNECTION_FLAGS
-
-XORG_MANPAGE_SECTIONS
-XORG_RELEASE_VERSION
-XORG_CHANGELOG
 
 AC_OUTPUT([Makefile])
