@@ -19,12 +19,14 @@
 #  TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 #  PERFORMANCE OF THIS SOFTWARE.
 
+configdir = $(sysconfdir)/X11/lbxproxy
+
 bin_PROGRAMS = lbxproxy
 
 AM_CFLAGS = $(CWARNFLAGS)
 
 AM_CPPFLAGS = $(LBXPROXY_CFLAGS) $(OS_CFLAGS) -I$(top_srcdir)/include	\
-	-DDEF_ATOMS_FILE=\"$(libdir)/X11/lbxproxy/AtomControl\" \
+	-DDEF_ATOMS_FILE=\"$(configdir)/AtomControl\" \
 	-D_BSD_SOURCE -DLBXPROXY_t -DTRANS_SERVER
 
 lbxproxy_LDADD = $(LBXPROXY_LIBS)
@@ -83,7 +85,6 @@ lbxproxy_SOURCES = \
 appman_PRE = \
         lbxproxy.man
 
-configdir = $(libdir)/X11/lbxproxy
 dist_config_DATA = config/AtomControl
 
 EXTRA_DIST = \
