@@ -246,8 +246,8 @@ void
 SendGetProxyAddrReply (
     IceConn requestor_iceConn,
     int status,
-    char *addr,
-    char *error)
+    const char *addr,
+    const char *error)
 
 {
     int len = STRING_BYTES (addr) + STRING_BYTES (error);
@@ -269,7 +269,7 @@ SendGetProxyAddrReply (
 
 
 static int
-casecmp(char *str1, char *str2)
+casecmp(const char *str1, const char *str2)
 {
     char buf1[512],buf2[512];
     char c, *s;

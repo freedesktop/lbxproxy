@@ -44,8 +44,8 @@ extern void ConnectToProxyManager (
 extern void SendGetProxyAddrReply (
     IceConn /*requestor_iceConn*/,
     int /*status*/,
-    char * /*addr*/,
-    char * /*error*/
+    const char * /*addr*/,
+    const char * /*error*/
 );
 
 extern void HandleProxyManagerConnection (
