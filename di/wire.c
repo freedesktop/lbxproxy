@@ -1116,7 +1116,7 @@ ProxyWorkProc(ClientPtr unused_client, pointer index)
     XServerPtr  server;
     xLbxAllowMotionReq req;
 
-    if ((server = servers[(int)index]) == 0)
+    if ((server = servers[(long)index]) == 0)
 	return TRUE;
     if (!server->initialized)
 	return TRUE;
