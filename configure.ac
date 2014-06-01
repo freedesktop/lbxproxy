@@ -30,7 +30,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_HOST
 
 # Initialize Automake
-AM_INIT_AUTOMAKE([dist-bzip2])
+AM_INIT_AUTOMAKE([foreign dist-bzip2])
 AM_MAINTAINER_MODE
 
 # Set common system defines for POSIX extensions, such as _GNU_SOURCE
