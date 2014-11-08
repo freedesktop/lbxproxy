@@ -917,7 +917,7 @@ LBXReadAtomsFile(XServerPtr server)
 	return;
     }
 
-    fseek (f, 0, 0);
+    fseek (f, 0, SEEK_SET);
 
     while (fgets (buf, 256, f))
     {
