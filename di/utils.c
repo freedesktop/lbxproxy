@@ -392,7 +392,11 @@ proxyProcessArgument(int argc, char **argv, int i)
     if (strcmp (argv[i], "-maxservers") == 0)
     {
 	if (++i < argc)
+	{
 	    lbxMaxServers = atoi(argv[i]);
+	    if (lbxMaxServers <= 0 || lbxMaxServers > 1024)
+		FatalError("out of range value for -maxservers");
+	}
 	else
 	    ShowHelpAndExit (1);
 	return 2;
@@ -449,6 +453,8 @@ ProcessCommandLine(int argc, char *argv[])
      */
     if ((env = getenv ("LBXPROXY_MAXSERVERS")))
 	lbxMaxServers = atoi (env);
+    if (lbxMaxServers <= 0 || lbxMaxServers > 1024)
+        FatalError("out of range value for LBXPROXY_MAXSERVERS");
 
     for ( i = 1; i < argc; i++ )
     {
